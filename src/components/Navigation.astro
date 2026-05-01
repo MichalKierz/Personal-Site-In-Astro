@@ -11,6 +11,7 @@ const tabs = navigationContent.tabs as NavigationTab[];
 
 const productionDomain = "michalkierzkowski.com";
 const localPort = Astro.url.port ? `:${Astro.url.port}` : ":4321";
+const isDev = import.meta.env.DEV;
 
 function normalizePath(path: string) {
   if (!path.startsWith("/")) {
@@ -30,30 +31,6 @@ function withTrailingSlash(path: string) {
   return normalizedPath.endsWith("/") ? normalizedPath : `${normalizedPath}/`;
 }
 
-function getHostname() {
-  return Astro.url.hostname;
-}
-
-function isLocalHost() {
-  const hostname = getHostname();
-
-  return hostname === "localhost" || hostname.endsWith(".localhost");
-}
-
-function getCurrentSubdomain() {
-  const hostname = getHostname();
-
-  if (hostname.endsWith(".localhost")) {
-    return hostname.replace(".localhost", "");
-  }
-
-  if (hostname.endsWith(`.${productionDomain}`)) {
-    return hostname.replace(`.${productionDomain}`, "");
-  }
-
-  return "";
-}
-
 function getSectionFromPath(path: string) {
   const normalizedPath = normalizePath(path);
 
@@ -62,16 +39,6 @@ function getSectionFromPath(path: string) {
   }
 
   return normalizedPath.split("/").filter(Boolean)[0] ?? "main";
-}
-
-function getCurrentSection() {
-  const subdomain = getCurrentSubdomain();
-
-  if (subdomain && subdomain !== "www") {
-    return subdomain;
-  }
-
-  return getSectionFromPath(Astro.url.pathname);
 }
 
 function getTabSection(tab: NavigationTab) {
@@ -85,7 +52,7 @@ function getTabSection(tab: NavigationTab) {
 }
 
 function getMainHref() {
-  if (import.meta.env.DEV || isLocalHost()) {
+  if (isDev) {
     return `http://localhost${localPort}/`;
   }
 
@@ -97,18 +64,29 @@ function getTabHref(tab: NavigationTab) {
   const path = withTrailingSlash(tab.path);
 
   if (!subdomain) {
-    if (import.meta.env.DEV || isLocalHost()) {
+    if (isDev) {
       return `http://localhost${localPort}${path}`;
     }
 
     return `https://${productionDomain}${path}`;
   }
 
-  if (import.meta.env.DEV || isLocalHost()) {
+  if (isDev) {
     return `http://${subdomain}.localhost${localPort}/`;
   }
 
   return `https://${subdomain}.${productionDomain}/`;
+}
+
+function getCurrentSection() {
+  const pathname = Astro.url.pathname;
+  const section = getSectionFromPath(pathname);
+
+  if (section !== "main") {
+    return section;
+  }
+
+  return "main";
 }
 
 const currentSection = getCurrentSection();
