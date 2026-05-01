@@ -9,6 +9,9 @@ type NavigationTab = {
 
 const tabs = navigationContent.tabs as NavigationTab[];
 
+const productionDomain = "michalkierzkowski.com";
+const localPort = Astro.url.port ? `:${Astro.url.port}` : ":4321";
+
 function normalizePath(path: string) {
   if (!path.startsWith("/")) {
     return `/${path}`;
@@ -27,6 +30,30 @@ function withTrailingSlash(path: string) {
   return normalizedPath.endsWith("/") ? normalizedPath : `${normalizedPath}/`;
 }
 
+function getHostname() {
+  return Astro.url.hostname;
+}
+
+function isLocalHost() {
+  const hostname = getHostname();
+
+  return hostname === "localhost" || hostname.endsWith(".localhost");
+}
+
+function getCurrentSubdomain() {
+  const hostname = getHostname();
+
+  if (hostname.endsWith(".localhost")) {
+    return hostname.replace(".localhost", "");
+  }
+
+  if (hostname.endsWith(`.${productionDomain}`)) {
+    return hostname.replace(`.${productionDomain}`, "");
+  }
+
+  return "";
+}
+
 function getSectionFromPath(path: string) {
   const normalizedPath = normalizePath(path);
 
@@ -37,20 +64,59 @@ function getSectionFromPath(path: string) {
   return normalizedPath.split("/").filter(Boolean)[0] ?? "main";
 }
 
-function getTabHref(tab: NavigationTab) {
-  return withTrailingSlash(tab.path);
+function getCurrentSection() {
+  const subdomain = getCurrentSubdomain();
+
+  if (subdomain && subdomain !== "www") {
+    return subdomain;
+  }
+
+  return getSectionFromPath(Astro.url.pathname);
 }
 
 function getTabSection(tab: NavigationTab) {
+  const subdomain = tab.subdomain?.trim();
+
+  if (subdomain) {
+    return subdomain;
+  }
+
   return getSectionFromPath(tab.path);
 }
 
-const currentSection = getSectionFromPath(Astro.url.pathname);
+function getMainHref() {
+  if (import.meta.env.DEV || isLocalHost()) {
+    return `http://localhost${localPort}/`;
+  }
+
+  return `https://${productionDomain}/`;
+}
+
+function getTabHref(tab: NavigationTab) {
+  const subdomain = tab.subdomain?.trim();
+  const path = withTrailingSlash(tab.path);
+
+  if (!subdomain) {
+    if (import.meta.env.DEV || isLocalHost()) {
+      return `http://localhost${localPort}${path}`;
+    }
+
+    return `https://${productionDomain}${path}`;
+  }
+
+  if (import.meta.env.DEV || isLocalHost()) {
+    return `http://${subdomain}.localhost${localPort}/`;
+  }
+
+  return `https://${subdomain}.${productionDomain}/`;
+}
+
+const currentSection = getCurrentSection();
 ---
 
 <header class="site-header">
   <div class="topbar">
-    <a href="/" class="logo"> Michał Kierzkowski </a>
+    <a href={getMainHref()} class="logo"> Michał Kierzkowski </a>
 
     <nav class="nav" aria-label="Main navigation">
       {
