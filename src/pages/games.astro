@@ -1,0 +1,122 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import gamesPage from "../content/games.json";
+import "../styles/games.css";
+
+type GameItem = {
+  slug: string;
+  title: string;
+  image?: string;
+  sourcePath?: string;
+  description?: string;
+};
+
+type OrderItem = {
+  slug: string;
+  label?: string;
+};
+
+type OrderContent = {
+  games?: OrderItem[];
+};
+
+const gameModules = import.meta.glob("../content/games/*.json", {
+  eager: true,
+});
+
+const games = Object.entries(gameModules).map(([filePath, module]) => {
+  const fileName = filePath.split("/").pop() ?? "";
+  const slug = fileName.replace(".json", "");
+
+  return {
+    slug,
+    ...(module as { default: Omit<GameItem, "slug"> }).default,
+  };
+}) as GameItem[];
+
+const orderModules = import.meta.glob("../content/game-order.json", {
+  eager: true,
+});
+
+const orderModule = Object.values(orderModules)[0] as
+  | { default: OrderContent }
+  | undefined;
+
+const order = orderModule?.default?.games ?? [];
+
+function sortByOrder(items: GameItem[], orderItems: OrderItem[]) {
+  const itemMap = new Map(items.map((item) => [item.slug, item]));
+  const usedSlugs = new Set<string>();
+  const orderedItems: GameItem[] = [];
+
+  for (const orderItem of orderItems) {
+    const item = itemMap.get(orderItem.slug);
+
+    if (!item || usedSlugs.has(item.slug)) {
+      continue;
+    }
+
+    orderedItems.push(item);
+    usedSlugs.add(item.slug);
+  }
+
+  const remainingItems = items
+    .filter((item) => !usedSlugs.has(item.slug))
+    .sort((a, b) => a.title.localeCompare(b.title));
+
+  return [...orderedItems, ...remainingItems];
+}
+
+const sortedGames = sortByOrder(games, order);
+
+function getGameHref(slug: string) {
+  return `/games/${slug}/`;
+}
+
+function getImageSrc(image?: string) {
+  if (!image) {
+    return "";
+  }
+
+  if (image.startsWith("public/")) {
+    return image.replace("public", "");
+  }
+
+  return image;
+}
+---
+
+<BaseLayout title="Games">
+  <div class="main-html games-intro" set:html={gamesPage.html} />
+
+  {
+    sortedGames.length === 0 ? (
+      <p class="main-text">No games yet.</p>
+    ) : (
+      <section class="games-list-grid">
+        {sortedGames.map((game) => {
+          const imageSrc = getImageSrc(game.image);
+
+          return (
+            <a href={getGameHref(game.slug)} class="game-list-card">
+              <div class="game-list-card-media">
+                {imageSrc ? (
+                  <img
+                    src={imageSrc}
+                    alt={game.title}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <div class="game-list-card-empty">no image</div>
+                )}
+              </div>
+
+              <div class="game-list-card-title">{game.title}</div>
+            </a>
+          );
+        })}
+      </section>
+    )
+  }
+</BaseLayout>

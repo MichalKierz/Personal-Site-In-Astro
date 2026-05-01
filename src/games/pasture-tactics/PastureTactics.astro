@@ -1,0 +1,47 @@
+---
+import "./style.css";
+import "./interface.css";
+---
+
+<section class="pasture-game" data-pasture-game>
+  <div class="pasture-canvas-wrap">
+    <canvas
+      data-canvas
+      width="1000"
+      height="620"
+      aria-label="Pasture Tactics game"></canvas>
+
+    <div class="pasture-overlay">
+      <div class="pasture-score pasture-score-left">
+        <span class="pasture-score-label">Score</span>
+        <strong data-score>0</strong>
+      </div>
+
+      <div class="pasture-score pasture-score-center">
+        <span class="pasture-score-label">Turn</span>
+        <strong><span data-turn>0</span>/<span data-max-turns>20</span></strong>
+      </div>
+
+      <div class="pasture-score pasture-score-right">
+        <span class="pasture-score-label">Best Score</span>
+        <strong data-best>0</strong>
+      </div>
+
+      <div class="pasture-animals" data-animals></div>
+
+      <div class="pasture-actions" data-actions></div>
+
+      <div class="pasture-events" data-events></div>
+
+      <div class="pasture-prophecy" aria-hidden="true">🔮</div>
+
+      <div class="pasture-message" data-message>Choose an action to start.</div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initPastureTactics } from "./game.js";
+
+  initPastureTactics();
+</script>

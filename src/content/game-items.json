@@ -1,0 +1,25 @@
+{
+  "games": [
+    {
+      "slug": "paddle-ball",
+      "title": "Paddle Ball",
+      "sourcePath": "",
+      "image": "",
+      "description": "Move the paddle with your mouse or finger and keep the ball alive. Every bounce gives you one point."
+    },
+    {
+      "slug": "tesseract-match",
+      "title": "Tesseract Match",
+      "sourcePath": "",
+      "image": "",
+      "description": "Rotate the tesseract with your mouse or finger and use the 4D slider to match the target view as fast as possible."
+    },
+    {
+      "slug": "pasture-tactics",
+      "title": "Pasture Tactics",
+      "sourcePath": "",
+      "image": "/images/games/pasture-tactics/pasture-tactics.png",
+      "description": "Build your herd, choose one action each turn, survive random events and score as much as possible in 20 turns."
+    }
+  ]
+}

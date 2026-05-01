@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@import "./base.css";
+@import "./background.css";
+@import "./layout.css";
+@import "./profile.css";
+@import "./links.css";
+@import "./projects.css";
+@import "./art.css";
+@import "./modal.css";

@@ -1,0 +1,11 @@
+{
+  "projects": [
+    {
+      "slug": "projekt-test",
+      "title": "Projekt test",
+      "sourcePath": "",
+      "image": "/images/projects/projekt-test/image.png",
+      "descriptionHtml": "bla bla bla <a href=\"google.com\"> bla </a>"
+    }
+  ]
+}

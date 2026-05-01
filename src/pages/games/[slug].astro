@@ -1,0 +1,105 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import "../../styles/games.css";
+
+import PaddleBall from "../../games/paddle-ball/PaddleBall.astro";
+import TesseractMatch from "../../games/tesseract-match/TesseractMatch.astro";
+import PastureTactics from "../../games/pasture-tactics/PastureTactics.astro";
+
+type GameItem = {
+  slug: string;
+  title: string;
+  image?: string;
+  sourcePath?: string;
+  description?: string;
+};
+
+const gameRegistry = {
+  "paddle-ball": {
+    component: PaddleBall,
+    aspectRatio: 900 / 620,
+    maxWidth: 980,
+  },
+
+  "tesseract-match": {
+    component: TesseractMatch,
+    aspectRatio: 1000 / 620,
+    maxWidth: 1080,
+  },
+
+  "pasture-tactics": {
+    component: PastureTactics,
+    aspectRatio: 1000 / 620,
+    maxWidth: 1080,
+  },
+};
+
+export async function getStaticPaths() {
+  const modules = import.meta.glob("../../content/games/*.json", {
+    eager: true,
+  });
+
+  const games = Object.entries(modules).map(([filePath, module]) => {
+    const fileName = filePath.split("/").pop() ?? "";
+    const slug = fileName.replace(".json", "");
+
+    return {
+      slug,
+      ...(module as { default: Omit<GameItem, "slug"> }).default,
+    };
+  }) as GameItem[];
+
+  return games.map((game) => ({
+    params: { slug: game.slug },
+    props: { game },
+  }));
+}
+
+const { game } = Astro.props as { game: GameItem };
+
+const slug = game.slug;
+
+const gameConfig = gameRegistry[slug as keyof typeof gameRegistry];
+
+const GameComponent = gameConfig?.component;
+
+const gamesHref = "/games/";
+
+const pageTitle = game.title;
+---
+
+<BaseLayout title={pageTitle}>
+  <section class="game-page" data-game-page>
+    <a href={gamesHref} class="back-link game-back-link main-html">← Games</a>
+
+    <header class="game-page-header">
+      <h1>{game.title}</h1>
+
+      {game.description ? <p class="main-html">{game.description}</p> : null}
+    </header>
+
+    <div
+      class="game-stage"
+      data-game-stage
+      data-game-aspect-ratio={String(gameConfig?.aspectRatio ?? 16 / 9)}
+      data-game-max-width={String(gameConfig?.maxWidth ?? 980)}
+    >
+      {
+        GameComponent ? (
+          <GameComponent />
+        ) : (
+          <p class="game-missing">
+            This game is configured in the panel, but it does not have a
+            matching game component in code yet.
+          </p>
+        )
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import { initGameStageSize } from "../../scripts/game-stage-size.js";
+
+  initGameStageSize();
+</script>

@@ -1,0 +1,186 @@
+.projects-intro {
+  margin-bottom: 24px;
+}
+
+.projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.project-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(119, 255, 59, 0.14);
+  padding: 12px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.42);
+}
+
+.project-image-wrap {
+  position: relative;
+  flex: 0 0 360px;
+  max-width: 40%;
+  background: #000000;
+  border: 1px solid #222;
+  overflow: hidden;
+}
+
+.project-image-wrap img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.project-image-actions {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 5;
+  display: flex;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+}
+
+.project-icon-button {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font: inherit;
+  font-size: 18px;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  appearance: none;
+}
+
+.project-icon-button:hover,
+.project-icon-button:focus-visible {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.project-icon-button:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+.project-image-empty {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+}
+
+.project-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.project-title {
+  margin: 0 0 10px;
+  color: var(--green);
+  font-size: clamp(26px, 2.2vw, 32px);
+  line-height: 1.2;
+}
+
+.project-status {
+  color: yellow;
+}
+
+.project-description p {
+  margin-bottom: 12px;
+}
+
+.image-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 72px 24px 24px;
+  background: rgba(0, 0, 0, 0.88);
+}
+
+.image-modal[hidden] {
+  display: none;
+}
+
+.image-modal img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.image-modal-bar {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: flex;
+  gap: 10px;
+}
+
+.image-modal-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font: inherit;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  appearance: none;
+}
+
+.image-modal-button:hover,
+.image-modal-button:focus-visible {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.image-modal-button:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+@media (max-width: 760px) {
+  .project-entry {
+    display: block;
+  }
+
+  .project-image-wrap {
+    max-width: none;
+    width: 100%;
+    margin-bottom: 12px;
+  }
+
+  .project-image-actions {
+    right: 8px;
+    bottom: 8px;
+    padding: 5px;
+  }
+
+  .project-icon-button {
+    width: 32px;
+    height: 32px;
+    font-size: 17px;
+  }
+}

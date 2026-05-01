@@ -1,0 +1,24 @@
+{
+  "projects": [
+    {
+      "slug": "astro-guess",
+      "label": "Astro Guess"
+    },
+    {
+      "slug": "space-empires",
+      "label": "Space Empires"
+    },
+    {
+      "slug": "meditation-sound-studio",
+      "label": "Meditation Sound Studio"
+    },
+    {
+      "slug": "infinite-ai-book-series-generator",
+      "label": "Infinite AI Book Series Generator"
+    },
+    {
+      "slug": "ml-music-snippet-training-and-generation-studio",
+      "label": "ML Music Snippet Training & Generation Studio"
+    }
+  ]
+}

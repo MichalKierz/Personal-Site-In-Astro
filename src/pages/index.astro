@@ -1,0 +1,26 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import mainContent from "../content/main.json";
+
+const hasPhoto = Boolean(mainContent.profilePhoto);
+---
+
+<BaseLayout title="Michał Kierzkowski">
+  <article class="main-content main-page">
+    <aside class="profile-box">
+      <div class="profile-photo">
+        {
+          hasPhoto ? (
+            <img src={mainContent.profilePhoto} alt="Profile photo" />
+          ) : (
+            <span>Profile photo</span>
+          )
+        }
+      </div>
+
+      <div class="profile-html" set:html={mainContent.profileHtml} />
+    </aside>
+
+    <div class="main-html" set:html={mainContent.mainHtml} />
+  </article>
+</BaseLayout>

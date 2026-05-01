@@ -1,0 +1,61 @@
+---
+import "./tesseract-match.css";
+---
+
+<section class="tesseract-game" data-tesseract-game>
+  <div class="tesseract-canvas-wrap">
+    <canvas
+      data-canvas
+      width="1000"
+      height="620"
+      aria-label="Tesseract matching game"
+    ></canvas>
+
+    <div class="tesseract-overlay">
+      <div class="tesseract-score tesseract-score-left">
+        <span class="tesseract-score-label">Time</span>
+        <strong data-time>0.0s</strong>
+      </div>
+
+      <div class="tesseract-score tesseract-score-right">
+        <span class="tesseract-score-label">Best Time</span>
+        <strong data-best>--</strong>
+      </div>
+
+      <div class="tesseract-title tesseract-title-left">
+        Your tesseract
+      </div>
+
+      <div class="tesseract-title tesseract-title-right">
+        Target view
+      </div>
+
+      <div class="tesseract-match-message" data-match-message hidden>
+        View matched
+      </div>
+
+      <div class="tesseract-status" data-status>
+        Rotate your tesseract to start.
+      </div>
+
+      <label class="tesseract-slider-panel">
+        <span>4D Rotation</span>
+        <input
+          data-fourth-slider
+          type="range"
+          min="-1.6"
+          max="1.6"
+          step="0.01"
+          value="0"
+          aria-label="4D rotation"
+        />
+      </label>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initTesseractMatchGames } from "./tesseract-match.js";
+
+  initTesseractMatchGames();
+</script>

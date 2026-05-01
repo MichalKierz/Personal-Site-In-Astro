@@ -1,0 +1,136 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import artPage from "../content/art.json";
+
+type ArtImage =
+  | string
+  | {
+      sourcePath?: string;
+      image?: string;
+      src?: string;
+      file?: string;
+      adminLabel?: string;
+    };
+
+type ArtCategory = {
+  slug: string;
+  title: string;
+  description?: string;
+  images?: ArtImage[];
+};
+
+type OrderItem = {
+  slug: string;
+  label?: string;
+};
+
+type OrderContent = {
+  categories?: OrderItem[];
+};
+
+const categoryModules = import.meta.glob("../content/art/categories/*.json", {
+  eager: true,
+});
+
+const categories = Object.entries(categoryModules).map(([filePath, module]) => {
+  const fileName = filePath.split("/").pop() ?? "";
+  const slug = fileName.replace(".json", "");
+
+  return {
+    slug,
+    ...(module as { default: Omit<ArtCategory, "slug"> }).default,
+  };
+}) as ArtCategory[];
+
+const orderModules = import.meta.glob("../content/art-category-order.json", {
+  eager: true,
+});
+
+const orderModule = Object.values(orderModules)[0] as
+  | { default: OrderContent }
+  | undefined;
+
+const order = orderModule?.default?.categories ?? [];
+
+function sortByOrder(items: ArtCategory[], orderItems: OrderItem[]) {
+  const itemMap = new Map(items.map((item) => [item.slug, item]));
+  const usedSlugs = new Set<string>();
+  const orderedItems: ArtCategory[] = [];
+
+  for (const orderItem of orderItems) {
+    const item = itemMap.get(orderItem.slug);
+
+    if (!item || usedSlugs.has(item.slug)) {
+      continue;
+    }
+
+    orderedItems.push(item);
+    usedSlugs.add(item.slug);
+  }
+
+  const remainingItems = items
+    .filter((item) => !usedSlugs.has(item.slug))
+    .sort((a, b) => a.title.localeCompare(b.title));
+
+  return [...orderedItems, ...remainingItems];
+}
+
+const sortedCategories = sortByOrder(categories, order);
+
+function getImageSrc(image: ArtImage | undefined) {
+  if (!image) {
+    return "";
+  }
+
+  if (typeof image === "string") {
+    return image.startsWith("public/") ? image.replace("public", "") : image;
+  }
+
+  const rawPath = image.image || image.src || image.file || "";
+
+  if (!rawPath) {
+    return "";
+  }
+
+  return rawPath.startsWith("public/")
+    ? rawPath.replace("public", "")
+    : rawPath;
+}
+
+function getCategoryHref(slug: string) {
+  return `/art/${slug}/`;
+}
+---
+
+<BaseLayout title="Art">
+  <div class="main-html art-intro" set:html={artPage.html} />
+
+  {
+    sortedCategories.length === 0 ? (
+      <p class="main-text">No art categories yet.</p>
+    ) : (
+      <section class="art-category-grid">
+        {sortedCategories.map((category) => {
+          const thumbnail = getImageSrc(category.images?.[0]);
+
+          return (
+            <a href={getCategoryHref(category.slug)} class="art-category-card">
+              {thumbnail ? (
+                <img
+                  src={thumbnail}
+                  alt={category.title}
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : (
+                <div class="art-category-empty">no images</div>
+              )}
+
+              <div class="art-category-title">{category.title}</div>
+            </a>
+          );
+        })}
+      </section>
+    )
+  }
+</BaseLayout>

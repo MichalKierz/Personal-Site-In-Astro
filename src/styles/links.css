@@ -1,0 +1,14 @@
+.contact-link,
+.contact-link:visited,
+.back-link,
+.back-link:visited {
+  color: var(--green);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.contact-link:hover,
+.back-link:hover {
+  color: #ffffff;
+}

@@ -1,0 +1,132 @@
+---
+import navigationContent from "../content/navigation.json";
+
+type NavigationTab = {
+  label: string;
+  path: string;
+  subdomain?: string;
+};
+
+const tabs = navigationContent.tabs as NavigationTab[];
+
+const hostname = Astro.url.hostname;
+const protocol = Astro.url.protocol;
+const port = Astro.url.port ? `:${Astro.url.port}` : "";
+
+function normalizePath(path: string) {
+  if (!path.startsWith("/")) {
+    return `/${path}`;
+  }
+
+  return path;
+}
+
+function getSectionFromPath(path: string) {
+  const normalizedPath = normalizePath(path);
+
+  if (normalizedPath === "/") {
+    return "main";
+  }
+
+  return normalizedPath.split("/").filter(Boolean)[0] ?? "main";
+}
+
+function getCurrentSubdomain() {
+  if (hostname.endsWith(".localhost")) {
+    return hostname.replace(".localhost", "");
+  }
+
+  if (hostname.endsWith(".michalkierzkowski.com")) {
+    return hostname.replace(".michalkierzkowski.com", "");
+  }
+
+  return "";
+}
+
+function getCurrentSection() {
+  const subdomain = getCurrentSubdomain();
+
+  if (subdomain && subdomain !== "www") {
+    return subdomain;
+  }
+
+  return getSectionFromPath(Astro.url.pathname);
+}
+
+function getTabSection(tab: NavigationTab) {
+  const subdomain = tab.subdomain?.trim();
+
+  if (subdomain) {
+    return subdomain;
+  }
+
+  return getSectionFromPath(tab.path);
+}
+
+function getMainHost() {
+  if (hostname === "localhost" || hostname.endsWith(".localhost")) {
+    return "localhost";
+  }
+
+  if (hostname === "michalkierzkowski.com" || hostname.endsWith(".michalkierzkowski.com")) {
+    return "michalkierzkowski.com";
+  }
+
+  return hostname;
+}
+
+function getTabHref(tab: NavigationTab) {
+  const path = normalizePath(tab.path);
+  const subdomain = tab.subdomain?.trim();
+
+  if (!subdomain) {
+    if (hostname === "localhost" || hostname.endsWith(".localhost")) {
+      return `${protocol}//localhost${port}${path}`;
+    }
+
+    if (hostname === "michalkierzkowski.com" || hostname.endsWith(".michalkierzkowski.com")) {
+      return `${protocol}//michalkierzkowski.com${path}`;
+    }
+
+    return path;
+  }
+
+  if (hostname === "localhost" || hostname.endsWith(".localhost")) {
+    return `${protocol}//${subdomain}.localhost${port}/`;
+  }
+
+  if (hostname === "michalkierzkowski.com" || hostname.endsWith(".michalkierzkowski.com")) {
+    return `${protocol}//${subdomain}.michalkierzkowski.com/`;
+  }
+
+  return path;
+}
+
+const currentSection = getCurrentSection();
+---
+
+<header class="site-header">
+  <div class="topbar">
+    <a href={`${protocol}//${getMainHost()}${port}/`} class="logo">
+      Michał Kierzkowski
+    </a>
+
+    <nav class="nav" aria-label="Main navigation">
+      {tabs.map((tab) => {
+        const tabSection = getTabSection(tab);
+
+        return (
+          <a
+            href={getTabHref(tab)}
+            class:list={[
+              "nav-link",
+              { active: currentSection === tabSection },
+            ]}
+          >
+            {tab.label}
+          </a>
+        );
+      })}
+    </nav>
+  </div>
+</header>

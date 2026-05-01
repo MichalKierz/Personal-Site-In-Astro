@@ -1,0 +1,36 @@
+---
+import "./paddle-ball.css";
+---
+
+<section class="paddle-game" data-paddle-game>
+  <div class="paddle-canvas-wrap">
+    <canvas
+      data-canvas
+      width="900"
+      height="620"
+      aria-label="Paddle Ball game"
+    ></canvas>
+
+    <div class="paddle-overlay">
+      <div class="paddle-score paddle-score-left">
+        <span class="paddle-score-label">Score</span>
+        <strong data-score>0</strong>
+      </div>
+
+      <div class="paddle-score paddle-score-right">
+        <span class="paddle-score-label">Best</span>
+        <strong data-best>0</strong>
+      </div>
+
+      <div class="paddle-message" data-message>
+        Grab the paddle to start.
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initPaddleBallGames } from "./paddle-ball.js";
+
+  initPaddleBallGames();
+</script>

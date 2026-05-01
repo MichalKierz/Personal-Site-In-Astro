@@ -1,0 +1,12 @@
+{
+  "categories": [
+    {
+      "slug": "edits",
+      "label": "Edits"
+    },
+    {
+      "slug": "ai-generated-images",
+      "label": "AI Generated Images"
+    }
+  ]
+}

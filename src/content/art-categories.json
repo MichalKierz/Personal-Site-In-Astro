@@ -1,0 +1,77 @@
+{
+  "categories": [
+    {
+      "slug": "gpt-image-2",
+      "title": "GPT Image 2",
+      "images": [
+        {
+          "sourcePath": "",
+          "image": "/images/art/gpt-image-2/images/0/image.png",
+          "adminLabel": "mars attack"
+        },
+        {
+          "sourcePath": "",
+          "image": "/images/art/gpt-image-2/images/1/image.png",
+          "adminLabel": "sprite sheet"
+        },
+        {
+          "sourcePath": "",
+          "image": "/images/art/gpt-image-2/images/2/image.png",
+          "adminLabel": "transformation"
+        },
+        {
+          "sourcePath": "",
+          "image": "/images/art/gpt-image-2/images/3/image.png",
+          "adminLabel": "freddy"
+        },
+        {
+          "sourcePath": "",
+          "image": "/images/art/gpt-image-2/images/4/image.png",
+          "adminLabel": "picnic"
+        }
+      ],
+      "description": ""
+    },
+    {
+      "slug": "ai-images",
+      "title": "AI Images",
+      "images": [
+        {
+          "sourcePath": "",
+          "image": "/images/art/ai-images/images/0/image.png",
+          "adminLabel": "wojna"
+        },
+        {
+          "sourcePath": "",
+          "image": "/images/art/ai-images/images/1/image.jpg",
+          "adminLabel": "duch"
+        }
+      ],
+      "description": ""
+    },
+    {
+      "slug": "images",
+      "title": "images",
+      "images": [
+        {
+          "sourcePath": "",
+          "image": "/images/art/images/gabriel-best-pic.png",
+          "adminLabel": "gabriel"
+        }
+      ],
+      "description": ""
+    },
+    {
+      "slug": "wallpapers",
+      "title": "Wallpapers",
+      "images": [
+        {
+          "sourcePath": "",
+          "image": "/images/art/wallpapers/cliff2.png",
+          "adminLabel": "cliff"
+        }
+      ],
+      "description": ""
+    }
+  ]
+}

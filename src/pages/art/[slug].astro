@@ -1,0 +1,180 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+type ArtImage =
+  | string
+  | {
+      image?: string;
+      src?: string;
+      file?: string;
+      adminLabel?: string;
+    };
+
+type ArtCategory = {
+  slug: string;
+  title: string;
+  description?: string;
+  images?: ArtImage[];
+};
+
+export async function getStaticPaths() {
+  const modules = import.meta.glob("../../content/art/categories/*.json", {
+    eager: true,
+  });
+
+  const categories = Object.entries(modules).map(([path, module]) => {
+    const fileName = path.split("/").pop() ?? "";
+    const slug = fileName.replace(".json", "");
+
+    return {
+      slug,
+      ...(module as { default: Omit<ArtCategory, "slug"> }).default,
+    };
+  }) as ArtCategory[];
+
+  return categories.map((category) => ({
+    params: { slug: category.slug },
+    props: { category },
+  }));
+}
+
+const { category } = Astro.props as { category: ArtCategory };
+
+const images = category.images ?? [];
+
+const backHref = "/art/";
+
+function getImageSrc(image: ArtImage) {
+  if (typeof image === "string") {
+    return image.startsWith("public/") ? image.replace("public", "") : image;
+  }
+
+  const rawPath = image.image || image.src || image.file || "";
+
+  if (!rawPath) {
+    return "";
+  }
+
+  return rawPath.startsWith("public/")
+    ? rawPath.replace("public", "")
+    : rawPath;
+}
+---
+
+<BaseLayout title={`${category.title}`}>
+  <div class="art-page-top">
+    <a href={backHref} class="back-link main-html">← Art</a>
+
+    <h1 class="main-heading main-html">{category.title}</h1>
+
+    {
+      category.description && (
+        <div class="main-text art-category-description">
+          {category.description}
+        </div>
+      )
+    }
+  </div>
+
+  {
+    images.length === 0 ? (
+      <p class="main-text">No images in this category yet.</p>
+    ) : (
+      <section class="art-image-grid">
+        {images.map((item, index) => {
+          const imageSrc = getImageSrc(item);
+
+          return (
+            <figure class="art-image-card">
+              <img
+                src={imageSrc}
+                alt={`${category.title} image ${index + 1}`}
+              />
+
+              <div class="art-image-actions">
+                <button
+                  type="button"
+                  class="art-icon-button"
+                  data-fullscreen-image={imageSrc}
+                  aria-label="Open image fullscreen"
+                >
+                  ⛶
+                </button>
+
+                <a
+                  class="art-icon-button"
+                  href={imageSrc}
+                  download
+                  aria-label="Download image"
+                >
+                  ↓
+                </a>
+              </div>
+            </figure>
+          );
+        })}
+      </section>
+    )
+  }
+
+  <div class="image-modal" data-image-modal hidden>
+    <div class="image-modal-bar">
+      <a class="image-modal-button" data-modal-download href="#" download>
+        Download
+      </a>
+
+      <button type="button" class="image-modal-button" data-modal-close>
+        Close
+      </button>
+    </div>
+
+    <img data-modal-image src="" alt="" />
+  </div>
+
+  <script>
+    const modal = document.querySelector("[data-image-modal]");
+    const modalImage = document.querySelector("[data-modal-image]");
+    const modalClose = document.querySelector("[data-modal-close]");
+    const modalDownload = document.querySelector("[data-modal-download]");
+    const openButtons = document.querySelectorAll("[data-fullscreen-image]");
+
+    openButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const image = button.getAttribute("data-fullscreen-image");
+
+        if (!image || !modal || !modalImage || !modalDownload) {
+          return;
+        }
+
+        modalImage.setAttribute("src", image);
+        modalDownload.setAttribute("href", image);
+        modal.removeAttribute("hidden");
+        document.body.classList.add("modal-open");
+      });
+    });
+
+    function closeModal() {
+      if (!modal || !modalImage) {
+        return;
+      }
+
+      modal.setAttribute("hidden", "");
+      modalImage.setAttribute("src", "");
+      document.body.classList.remove("modal-open");
+    }
+
+    modalClose?.addEventListener("click", closeModal);
+
+    modal?.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        closeModal();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closeModal();
+      }
+    });
+  </script>
+</BaseLayout>

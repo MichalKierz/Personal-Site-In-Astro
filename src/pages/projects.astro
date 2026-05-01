@@ -1,0 +1,197 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import projectsPage from "../content/projects.json";
+
+type ProjectItem = {
+  slug: string;
+  title: string;
+  status?: string;
+  image?: string;
+  sourcePath?: string;
+  descriptionHtml: string;
+};
+
+type OrderItem = {
+  slug: string;
+  label?: string;
+};
+
+type OrderContent = {
+  projects?: OrderItem[];
+};
+
+const projectModules = import.meta.glob("../content/projects/*.json", {
+  eager: true,
+});
+
+const projects = Object.entries(projectModules).map(([filePath, module]) => {
+  const fileName = filePath.split("/").pop() ?? "";
+  const slug = fileName.replace(".json", "");
+
+  return {
+    slug,
+    ...(module as { default: Omit<ProjectItem, "slug"> }).default,
+  };
+}) as ProjectItem[];
+
+const orderModules = import.meta.glob("../content/project-order.json", {
+  eager: true,
+});
+
+const orderModule = Object.values(orderModules)[0] as
+  | { default: OrderContent }
+  | undefined;
+
+const order = orderModule?.default?.projects ?? [];
+
+function sortByOrder(items: ProjectItem[], orderItems: OrderItem[]) {
+  const itemMap = new Map(items.map((item) => [item.slug, item]));
+  const usedSlugs = new Set<string>();
+  const orderedItems: ProjectItem[] = [];
+
+  for (const orderItem of orderItems) {
+    const item = itemMap.get(orderItem.slug);
+
+    if (!item || usedSlugs.has(item.slug)) {
+      continue;
+    }
+
+    orderedItems.push(item);
+    usedSlugs.add(item.slug);
+  }
+
+  const remainingItems = items
+    .filter((item) => !usedSlugs.has(item.slug))
+    .sort((a, b) => a.title.localeCompare(b.title));
+
+  return [...orderedItems, ...remainingItems];
+}
+
+const sortedProjects = sortByOrder(projects, order);
+
+function getImageSrc(image?: string) {
+  if (!image) {
+    return "";
+  }
+
+  if (image.startsWith("public/")) {
+    return image.replace("public", "");
+  }
+
+  return image;
+}
+---
+
+<BaseLayout title="Projects">
+  <div class="main-html projects-intro" set:html={projectsPage.html} />
+
+  {
+    sortedProjects.length === 0 ? (
+      <p class="main-text">No projects yet.</p>
+    ) : (
+      <section class="projects-list">
+        {sortedProjects.map((project) => {
+          const imageSrc = getImageSrc(project.image);
+          const status = project.status?.trim();
+
+          return (
+            <article class="project-entry">
+              <div class="project-image-wrap">
+                {imageSrc ? (
+                  <>
+                    <img
+                      src={imageSrc}
+                      alt={project.title}
+                      loading="lazy"
+                      decoding="async"
+                    />
+
+                    <div class="project-image-actions">
+                      <button
+                        type="button"
+                        class="project-icon-button"
+                        data-fullscreen-image={imageSrc}
+                        aria-label="Open image fullscreen"
+                      >
+                        ⛶
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div class="project-image-empty">no image</div>
+                )}
+              </div>
+
+              <div class="project-content">
+                <h2 class="project-title">
+                  {project.title}
+                  {status && <span class="project-status"> ({status})</span>}
+                </h2>
+
+                <div
+                  class="project-description main-html"
+                  set:html={project.descriptionHtml}
+                />
+              </div>
+            </article>
+          );
+        })}
+      </section>
+    )
+  }
+
+  <div class="image-modal" data-image-modal hidden>
+    <div class="image-modal-bar">
+      <button type="button" class="image-modal-button" data-modal-close>
+        Close
+      </button>
+    </div>
+
+    <img data-modal-image src="" alt="" />
+  </div>
+
+  <script>
+    const modal = document.querySelector("[data-image-modal]");
+    const modalImage = document.querySelector("[data-modal-image]");
+    const modalClose = document.querySelector("[data-modal-close]");
+    const openButtons = document.querySelectorAll("[data-fullscreen-image]");
+
+    openButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const image = button.getAttribute("data-fullscreen-image");
+
+        if (!image || !modal || !modalImage) {
+          return;
+        }
+
+        modalImage.setAttribute("src", image);
+        modal.removeAttribute("hidden");
+        document.body.classList.add("modal-open");
+      });
+    });
+
+    function closeModal() {
+      if (!modal || !modalImage) {
+        return;
+      }
+
+      modal.setAttribute("hidden", "");
+      modalImage.setAttribute("src", "");
+      document.body.classList.remove("modal-open");
+    }
+
+    modalClose?.addEventListener("click", closeModal);
+
+    modal?.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        closeModal();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closeModal();
+      }
+    });
+  </script>
+</BaseLayout>

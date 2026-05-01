@@ -1,0 +1,243 @@
+.pasture-actions {
+  position: absolute;
+  left: 1.84cqw;
+  bottom: 1.84cqw;
+  z-index: 5;
+  display: grid;
+  gap: 0.68cqw;
+  width: 34.4cqw;
+  pointer-events: auto;
+}
+
+.pasture-action {
+  display: grid;
+  gap: 0.14cqw;
+  width: 100%;
+  min-height: 5.2cqw;
+  padding: 0.65cqw 1.15cqw;
+  border: 0.1cqw solid rgb(0 0 0 / 9%);
+  border-radius: 1.45cqw;
+  background: rgb(255 255 255 / 92%);
+  color: #111111;
+  box-shadow: 0 1cqw 2.8cqw rgb(0 0 0 / 12%);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    opacity 120ms ease;
+}
+
+.pasture-action-do-nothing {
+  justify-self: start;
+  width: 50%;
+  min-height: 2.8cqw;
+  padding: 0.35cqw 0.9cqw;
+}
+
+.pasture-action-do-nothing .pasture-action-title {
+  font-size: 1cqw;
+}
+
+.pasture-action-do-nothing .pasture-action-detail {
+  font-size: 0.78cqw;
+}
+
+.pasture-action:hover:not(:disabled) {
+  transform: translateY(-0.1cqw);
+  box-shadow: 0 1.4cqw 3.4cqw rgb(0 0 0 / 16%);
+}
+
+.pasture-action:active:not(:disabled) {
+  transform: translateY(0.1cqw);
+}
+
+.pasture-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.pasture-action-title {
+  overflow: hidden;
+  font-size: 1.4cqw;
+  line-height: 1;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pasture-action-detail {
+  overflow: hidden;
+  color: rgb(0 0 0 / 64%);
+  font-size: 1.05cqw;
+  line-height: 1.12;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pasture-action-restart {
+  background: rgb(0 0 0 / 86%);
+  color: #ffffff;
+}
+
+.pasture-action-restart .pasture-action-detail {
+  color: rgb(255 255 255 / 72%);
+}
+
+.pasture-events {
+  position: absolute;
+  right: 1.84cqw;
+  bottom: 1.84cqw;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.93cqw;
+  width: 34.4cqw;
+  pointer-events: none;
+}
+
+.pasture-event {
+  display: grid;
+  gap: 0.14cqw;
+  min-height: 7.6cqw;
+  padding: 1.18cqw 1.52cqw;
+  border-radius: 1.52cqw;
+  background: rgb(255 255 255 / 88%);
+  border: 0.1cqw solid rgb(0 0 0 / 8%);
+  box-shadow: 0 1cqw 2.8cqw rgb(0 0 0 / 10%);
+  will-change: transform, opacity;
+}
+
+.pasture-event-current {
+  background: rgb(0 0 0 / 82%);
+  color: #ffffff;
+}
+
+.pasture-event-meta {
+  overflow: hidden;
+  color: rgb(0 0 0 / 60%);
+  font-size: 1.12cqw;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pasture-event-current .pasture-event-meta,
+.pasture-event-current .pasture-event-detail {
+  color: rgb(255 255 255 / 72%);
+}
+
+.pasture-event strong {
+  overflow: hidden;
+  font-size: 1.66cqw;
+  line-height: 1.05;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pasture-event-none strong {
+  color: #2fa356;
+}
+
+.pasture-event-current.pasture-event-none strong {
+  color: #7ef0a3;
+}
+
+.pasture-event-blessing strong {
+  color: #caa227;
+}
+
+.pasture-event-current.pasture-event-blessing strong {
+  color: #ffd76a;
+}
+
+.pasture-event-fox strong,
+.pasture-event-wolf strong,
+.pasture-event-bear strong,
+.pasture-event-flood strong,
+.pasture-event-game-over strong {
+  color: #d84a4a;
+}
+
+.pasture-event-current.pasture-event-fox strong,
+.pasture-event-current.pasture-event-wolf strong,
+.pasture-event-current.pasture-event-bear strong,
+.pasture-event-current.pasture-event-flood strong,
+.pasture-event-current.pasture-event-game-over strong {
+  color: #ff8787;
+}
+
+.pasture-event-game-end strong {
+  color: #111111;
+}
+
+.pasture-event-current.pasture-event-game-end strong {
+  color: #ffffff;
+}
+
+.pasture-event-start strong {
+  color: #ffffff;
+}
+
+.pasture-event-detail {
+  overflow: hidden;
+  color: rgb(0 0 0 / 64%);
+  font-size: 1.25cqw;
+  line-height: 1.1;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pasture-prophecy {
+  position: absolute;
+  right: 0.15cqw;
+  bottom: 0.9cqw;
+  z-index: 8;
+  display: block;
+  width: auto;
+  height: auto;
+  background: transparent;
+  color: inherit;
+  box-shadow: none;
+  border: 0;
+  border-radius: 0;
+  font-size: 8.16cqw;
+  line-height: 1;
+  pointer-events: none;
+  filter: drop-shadow(0 1cqw 1.8cqw rgb(0 0 0 / 20%));
+  transform: none;
+}
+
+.pasture-message {
+  position: absolute;
+  left: 50%;
+  bottom: 6.72cqw;
+  translate: -50% 0;
+  z-index: 3;
+  width: 38.4cqw;
+  max-width: 38.4cqw;
+  color: rgb(125 125 125 / 95%);
+  font-size: 1.92cqw;
+  line-height: 1.15;
+  font-weight: 900;
+  text-align: center;
+  pointer-events: none;
+  text-wrap: balance;
+}
+
+.pasture-overlay:has(.pasture-event-game-end) .pasture-message,
+.pasture-overlay:has(.pasture-event-game-over) .pasture-message {
+  width: 24cqw;
+  max-width: 24cqw;
+}

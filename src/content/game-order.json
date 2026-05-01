@@ -1,0 +1,16 @@
+{
+  "games": [
+    {
+      "slug": "pasture-tactics",
+      "label": "Pasture Tactics"
+    },
+    {
+      "slug": "tesseract-match",
+      "label": "Tesseract Match"
+    },
+    {
+      "slug": "paddle-ball",
+      "label": "Paddle Ball"
+    }
+  ]
+}

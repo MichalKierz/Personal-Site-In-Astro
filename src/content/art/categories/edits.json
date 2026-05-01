@@ -1,0 +1,45 @@
+{
+  "title": "Edits",
+  "images": [
+    {
+      "sourcePath": "",
+      "image": "/images/art/edits/backm2.png",
+      "adminLabel": "v-wallpaper"
+    },
+    {
+      "sourcePath": "",
+      "image": "/images/art/edits/iso-ghost.png",
+      "adminLabel": "green-demon"
+    },
+    {
+      "sourcePath": "",
+      "image": "/images/art/edits/greenmessiah.png",
+      "adminLabel": "green-messiah"
+    },
+    {
+      "sourcePath": "",
+      "image": "/images/art/edits/cliff2.png",
+      "adminLabel": "green-cliff"
+    },
+    {
+      "sourcePath": "",
+      "image": "/images/art/edits/synthstatue.jpg",
+      "adminLabel": "synth-statue"
+    },
+    {
+      "sourcePath": "",
+      "image": "/images/art/edits/art3.png",
+      "adminLabel": "limon-artpiece"
+    },
+    {
+      "sourcePath": "",
+      "image": "/images/art/edits/artc.png",
+      "adminLabel": "color-mountains"
+    },
+    {
+      "sourcePath": "",
+      "image": "/images/art/edits/wolfbird.png",
+      "adminLabel": "wolfbird-greenspace"
+    }
+  ]
+}

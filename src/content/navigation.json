@@ -1,0 +1,24 @@
+{
+  "tabs": [
+    {
+      "label": "Main",
+      "path": "/",
+      "subdomain": ""
+    },
+    {
+      "label": "Projects",
+      "path": "/projects/",
+      "subdomain": "projects"
+    },
+    {
+      "label": "Games",
+      "path": "/games/",
+      "subdomain": "games"
+    },
+    {
+      "label": "Art",
+      "path": "/art/",
+      "subdomain": "art"
+    }
+  ]
+}
