@@ -4,6 +4,7 @@ import {
   cleanupDeletedPublicFolders,
   getJsonFilesFromDirectory,
   importImageFromSourcePath,
+  movePublicImageToSlug,
   readJsonFile,
   writeJsonFile,
 } from "./importer-utils.mjs";
@@ -52,6 +53,19 @@ export function processArtCategoryFile(filePath) {
       changed = true;
     }
 
+    const movedImage = movePublicImageToSlug({
+      publicPath: item.image,
+      publicBaseDir: path.join(root, "public", "images", "art"),
+      publicBasePath: "/images/art",
+      targetSlug: slug,
+      logLabel: "art-importer",
+    });
+
+    if (movedImage && movedImage !== item.image) {
+      item.image = movedImage;
+      changed = true;
+    }
+
     const result = importImageFromSourcePath({
       sourcePath: item.sourcePath,
       targetDir: path.join(root, "public", "images", "art", slug),
@@ -63,11 +77,19 @@ export function processArtCategoryFile(filePath) {
       return item;
     }
 
+    const resultImage = movePublicImageToSlug({
+      publicPath: result.publicPath,
+      publicBaseDir: path.join(root, "public", "images", "art"),
+      publicBasePath: "/images/art",
+      targetSlug: slug,
+      logLabel: "art-importer",
+    });
+
     changed = true;
 
     return {
       sourcePath: "",
-      image: result.publicPath,
+      image: resultImage ?? result.publicPath,
       adminLabel:
         item.adminLabel ||
         path.basename(result.fileName, path.extname(result.fileName)),

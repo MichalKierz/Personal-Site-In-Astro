@@ -12,3 +12,34 @@
 .back-link:hover {
   color: #ffffff;
 }
+
+.back-button,
+.back-button:visited {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 15px;
+  border: 1px solid rgba(119, 255, 59, 0.58);
+  border-radius: 999px;
+  background: rgba(119, 255, 59, 0.1);
+  color: var(--green);
+  font: inherit;
+  font-weight: bold;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  appearance: none;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.28);
+}
+
+.back-button:hover,
+.back-button:focus-visible {
+  background: var(--green);
+  color: #111111;
+}
+
+.back-button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}

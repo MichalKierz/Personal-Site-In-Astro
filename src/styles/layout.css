@@ -2,6 +2,11 @@
   background: rgba(0, 0, 0, 0.72);
   border-bottom: 3px solid var(--green);
   backdrop-filter: blur(8px);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  line-height: 1;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 .topbar {
@@ -14,15 +19,24 @@
 }
 
 .logo {
+  display: inline-flex;
+  align-items: center;
   color: var(--text);
   font-weight: bold;
   font-size: 26px;
+  line-height: 1;
+  white-space: nowrap;
+  flex: 0 0 auto;
+  letter-spacing: 0;
 }
 
 .nav {
   display: flex;
   align-items: stretch;
   gap: 0;
+  flex: 0 0 auto;
+  font-size: 16px;
+  line-height: 1;
 }
 
 .nav-link {
@@ -33,6 +47,9 @@
   color: var(--muted);
   border-left: 1px solid rgba(119, 255, 59, 0.14);
   font-size: 16px;
+  line-height: 1;
+  white-space: nowrap;
+  letter-spacing: 0;
 }
 
 .nav-link:last-child {
@@ -119,6 +136,17 @@
   height: auto;
 }
 
+.game-detail-page > .game-back-link-row {
+  width: 100%;
+  padding-left: 12px;
+  padding-right: 12px;
+  margin-bottom: 12px;
+}
+
+.game-detail-page > .game-back-link-row .game-back-link {
+  display: inline-flex;
+}
+
 @media (max-width: 680px) {
   .topbar {
     display: block;
@@ -128,19 +156,78 @@
   .logo {
     display: block;
     margin-bottom: 10px;
+    font-size: 24px;
+    line-height: 1.1;
   }
 
   .nav {
+    display: flex;
     flex-wrap: wrap;
+    align-items: stretch;
+    gap: 0;
+    font-size: 16px;
+    line-height: 1;
   }
 
   .nav-link {
     min-height: 36px;
-    border: 1px solid rgba(119, 255, 59, 0.14);
-    margin: 0 4px 4px 0;
+    margin: 0;
+    padding: 0 12px;
+    border-top: 1px solid rgba(119, 255, 59, 0.14);
+    border-bottom: 1px solid rgba(119, 255, 59, 0.14);
+    border-left: 1px solid rgba(119, 255, 59, 0.14);
+    border-right: 0;
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .nav-link:last-child {
+    border-right: 1px solid rgba(119, 255, 59, 0.14);
   }
 
   .page {
     padding: 12px;
+  }
+}
+
+@media (max-width: 680px) and (orientation: portrait) {
+  .page.game-detail-page {
+    overflow: visible;
+  }
+
+  .page.game-detail-page .game-page {
+    overflow: visible;
+  }
+
+  .page.game-detail-page .game-page-header {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .page.game-detail-page .game-page-header h1,
+  .page.game-detail-page .game-page-header p,
+  .page.game-detail-page .game-page-header .main-html {
+    width: 100%;
+    max-width: 42rem;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  .page.game-detail-page .game-stage {
+    width: 100vw;
+    max-width: none;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    position: relative;
+    left: auto;
+    transform: none;
   }
 }

@@ -70,17 +70,10 @@
   justify-items: center;
 }
 
-.game-back-link {
-  justify-self: center;
+.game-back-row {
   width: min(100%, 980px);
-  color: var(--green);
-  text-decoration-line: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
-}
-
-.game-back-link:hover {
-  color: #ffffff;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .game-page-header {
@@ -169,9 +162,11 @@
     padding-inline: 0.75rem;
   }
 
-  .game-back-link {
+  .game-back-button {
+    min-height: 30px;
+    padding: 6px 11px;
     font-size: 0.82rem;
-    line-height: 1.1;
+    line-height: 1;
   }
 
   .game-page-header {

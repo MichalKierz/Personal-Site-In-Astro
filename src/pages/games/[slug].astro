@@ -5,6 +5,7 @@ import "../../styles/games.css";
 import PaddleBall from "../../games/paddle-ball/PaddleBall.astro";
 import TesseractMatch from "../../games/tesseract-match/TesseractMatch.astro";
 import PastureTactics from "../../games/pasture-tactics/PastureTactics.astro";
+import SwordPlay from "../../games/sword-play/SwordPlay.astro";
 
 type GameItem = {
   slug: string;
@@ -31,6 +32,12 @@ const gameRegistry = {
     component: PastureTactics,
     aspectRatio: 1000 / 620,
     maxWidth: 1080,
+  },
+
+  "sword-play": {
+    component: SwordPlay,
+    aspectRatio: 900 / 620,
+    maxWidth: 980,
   },
 };
 
@@ -68,10 +75,12 @@ const gamesHref = "/games/";
 const pageTitle = game.title;
 ---
 
-<BaseLayout title={pageTitle}>
-  <section class="game-page" data-game-page>
-    <a href={gamesHref} class="back-link game-back-link main-html">← Games</a>
+<BaseLayout title={pageTitle} pageClass="game-detail-page">
+  <div class="game-back-row">
+    <a href={gamesHref} class="back-button game-back-button">Back to Games</a>
+  </div>
 
+  <section class="game-page" data-game-page>
     <header class="game-page-header">
       <h1>{game.title}</h1>
 
@@ -94,6 +103,9 @@ const pageTitle = game.title;
           </p>
         )
       }
+      <br />
+      <br /><br />
+      <br /><br />
     </div>
   </section>
 </BaseLayout>

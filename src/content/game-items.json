@@ -1,6 +1,13 @@
 {
   "games": [
     {
+      "slug": "sword-play",
+      "title": "Sword Play",
+      "sourcePath": "",
+      "image": "/images/games/sword-play/sword-play.png",
+      "description": "Grab a blue body part and control your puppet fighter. Deflect enemy swords, strike the red puppets and survive as long as possible."
+    },
+    {
       "slug": "paddle-ball",
       "title": "Paddle Ball",
       "sourcePath": "",

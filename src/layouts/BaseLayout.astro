@@ -1,15 +1,18 @@
 ---
 import "../styles/global.css";
 import Navigation from "../components/Navigation.astro";
+import { ClientRouter } from "astro:transitions";
 
 interface Props {
   title?: string;
   description?: string;
+  pageClass?: string;
 }
 
 const {
   title = "Michał Kierzkowski",
   description = "Personal creative website.",
+  pageClass = "",
 } = Astro.props;
 ---
 
@@ -20,12 +23,15 @@ const {
     <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
+    <ClientRouter fallback="swap" />
   </head>
 
   <body>
+    <canvas id="site-background" aria-hidden="true" transition:persist></canvas>
+
     <Navigation />
 
-    <main class="page">
+    <main class:list={["page", pageClass]}>
       <slot />
     </main>
 

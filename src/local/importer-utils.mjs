@@ -78,6 +78,56 @@ export function getAvailableFileName(directory, fileName) {
   return candidate;
 }
 
+function normalizePublicBasePath(publicBasePath) {
+  const normalized = String(publicBasePath ?? "")
+    .replaceAll("\\", "/")
+    .replace(/\/+$/g, "");
+
+  return normalized.startsWith("/") ? normalized : `/${normalized}`;
+}
+
+function normalizePublicImagePath(publicPath) {
+  if (!publicPath || typeof publicPath !== "string") {
+    return "";
+  }
+
+  return publicPath.trim().replaceAll("\\", "/");
+}
+
+function toAbsolutePath(root, value) {
+  return path.isAbsolute(value) ? value : path.join(root, value);
+}
+
+function sameFileContent(firstPath, secondPath) {
+  if (!fs.existsSync(firstPath) || !fs.existsSync(secondPath)) {
+    return false;
+  }
+
+  const firstStats = fs.statSync(firstPath);
+  const secondStats = fs.statSync(secondPath);
+
+  if (firstStats.size !== secondStats.size) {
+    return false;
+  }
+
+  return fs.readFileSync(firstPath).equals(fs.readFileSync(secondPath));
+}
+
+function moveFile(sourcePath, targetPath) {
+  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+
+  try {
+    fs.renameSync(sourcePath, targetPath);
+  } catch (error) {
+    if (error?.code !== "EXDEV") {
+      throw error;
+    }
+
+    fs.copyFileSync(sourcePath, targetPath);
+    fs.unlinkSync(sourcePath);
+  }
+}
+
 function findExistingIdenticalFile(directory, sourcePath) {
   if (!fs.existsSync(directory)) {
     return null;
@@ -185,6 +235,81 @@ export function cleanupDeletedPublicFolders({
       force: true,
     });
   }
+}
+
+export function movePublicImageToSlug({
+  publicPath,
+  publicBaseDir,
+  publicBasePath,
+  targetSlug,
+  logLabel,
+}) {
+  const normalizedPublicPath = normalizePublicImagePath(publicPath);
+
+  if (!normalizedPublicPath) {
+    return null;
+  }
+
+  const normalizedBasePath = normalizePublicBasePath(publicBasePath);
+  const basePrefix = `${normalizedBasePath}/`;
+
+  if (!normalizedPublicPath.startsWith(basePrefix)) {
+    return normalizedPublicPath;
+  }
+
+  const relativePath = normalizedPublicPath.slice(basePrefix.length);
+  const pathParts = relativePath.split("/").filter(Boolean);
+
+  if (pathParts.length < 2) {
+    return normalizedPublicPath;
+  }
+
+  const currentSlug = pathParts[0];
+  const imageParts = pathParts.slice(1);
+
+  if (currentSlug === targetSlug) {
+    return normalizedPublicPath;
+  }
+
+  const root = process.cwd();
+  const absolutePublicBaseDir = toAbsolutePath(root, publicBaseDir);
+  const sourcePath = path.join(absolutePublicBaseDir, currentSlug, ...imageParts);
+  const targetDir = path.join(absolutePublicBaseDir, targetSlug, ...imageParts.slice(0, -1));
+  const originalFileName = imageParts.at(-1);
+  const preferredTargetPath = path.join(targetDir, originalFileName);
+  let targetFileName = originalFileName;
+  let targetPath = preferredTargetPath;
+
+  if (!fs.existsSync(sourcePath)) {
+    if (fs.existsSync(preferredTargetPath)) {
+      return `${normalizedBasePath}/${targetSlug}/${imageParts.join("/")}`;
+    }
+
+    console.warn(`[${logLabel}] Referenced image does not exist: ${normalizedPublicPath}`);
+    return normalizedPublicPath;
+  }
+
+  if (fs.existsSync(preferredTargetPath)) {
+    if (sameFileContent(sourcePath, preferredTargetPath)) {
+      fs.rmSync(sourcePath, { force: true });
+      return `${normalizedBasePath}/${targetSlug}/${imageParts.join("/")}`;
+    }
+
+    targetFileName = getAvailableFileName(targetDir, originalFileName);
+    targetPath = path.join(targetDir, targetFileName);
+  }
+
+  moveFile(sourcePath, targetPath);
+
+  const nextPublicPath = `${normalizedBasePath}/${targetSlug}/${[
+    ...imageParts.slice(0, -1),
+    targetFileName,
+  ].join("/")}`;
+
+  console.log(`[${logLabel}] Moved image: ${normalizedPublicPath}`);
+  console.log(`[${logLabel}]          to: ${nextPublicPath}`);
+
+  return nextPublicPath;
 }
 
 export function importImageFromSourcePath({

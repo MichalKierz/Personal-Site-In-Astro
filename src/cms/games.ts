@@ -25,11 +25,9 @@ export const gameItems = collection({
   },
 
   schema: {
-    title: fields.slug({
-      name: {
-        label: "Game name",
-        validation: { isRequired: true },
-      },
+    title: fields.text({
+      label: "Game name",
+      validation: { isRequired: true },
     }),
 
     sourcePath: fields.text({

@@ -1,23 +1,42 @@
 (() => {
+  const existingController = window.__siteBackgroundController;
+
+  if (existingController) {
+    existingController.mount();
+    return;
+  }
+
   const SETTINGS = {
-    ridgeCount: 10,
+    strandSpacing: 86,
+    strandSpacingVariation: 12,
+
+    gradientRadius: 240,
+    gradientExponent: 1,
+    brightnessGamma: 20,
 
     density: 50,
     densityVariationA: 10,
     densityVariationB: 0.1,
 
-    gradientScale: 0.5,
-    gradientExponent: 1,
-    brightnessGamma: 20,
-
-    interactionRadius: 0.1,
-    interactionStrength: 0.018,
+    interactionRadius: 54,
+    interactionStrength: 8,
     interactionPasses: 3,
     anchorStrength: 0.12,
 
     vignetteStrength: 0.06,
-    ditherStrength: 0.0025,
+    noiseStrength: 0.0012,
+
+    renderScale: 1.5,
+    maxPixelRatio: 2,
+    resizeDelay: 120,
+    widthResetThreshold: 48,
   };
+
+  const stableSizes = new Map();
+
+  let resizeTimer = null;
+  let lastDrawKey = "";
+  let mounted = false;
 
   function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
@@ -30,6 +49,14 @@
   function seedRandom(seed) {
     const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453123;
     return x - Math.floor(x);
+  }
+
+  function hashNoise(x, y) {
+    let hash = Math.imul(x, 374761393) ^ Math.imul(y, 668265263);
+    hash = Math.imul(hash ^ (hash >>> 13), 1274126177);
+    hash = (hash ^ (hash >>> 16)) >>> 0;
+
+    return hash / 4294967295;
   }
 
   function createCanvas() {
@@ -45,75 +72,124 @@
     return canvas;
   }
 
+  function getViewportSize() {
+    return {
+      width: Math.max(
+        1,
+        Math.round(window.innerWidth || document.documentElement.clientWidth || 1)
+      ),
+      height: Math.max(
+        1,
+        Math.round(window.innerHeight || document.documentElement.clientHeight || 1)
+      ),
+    };
+  }
+
+  function getOrientationKey(size) {
+    return size.width >= size.height ? "landscape" : "portrait";
+  }
+
+  function getStableViewportSize() {
+    const currentSize = getViewportSize();
+    const orientationKey = getOrientationKey(currentSize);
+    const savedSize = stableSizes.get(orientationKey);
+
+    if (
+      !savedSize ||
+      Math.abs(savedSize.width - currentSize.width) >
+        SETTINGS.widthResetThreshold
+    ) {
+      stableSizes.set(orientationKey, currentSize);
+      return currentSize;
+    }
+
+    const nextSize = {
+      width: currentSize.width,
+      height: Math.max(savedSize.height, currentSize.height),
+    };
+
+    stableSizes.set(orientationKey, nextSize);
+
+    return nextSize;
+  }
+
   function gradientFromDistance(distance) {
-    const t = clamp(1 - distance / SETTINGS.gradientScale, 0, 1);
+    const t = clamp(1 - distance / SETTINGS.gradientRadius, 0, 1);
     return Math.pow(t, SETTINGS.gradientExponent);
   }
 
   function colorFromGradient(value) {
     const brightness = Math.pow(clamp(value, 0, 1), SETTINGS.brightnessGamma);
 
-    return [
-      brightness * 119,
-      brightness * 255,
-      brightness * 59,
-    ];
+    return [brightness * 119, brightness * 255, brightness * 59];
   }
 
-  function createRidges() {
-    const ridges = [];
-
-    for (let i = 0; i < SETTINGS.ridgeCount; i += 1) {
-      const s = i + 1;
-      const baseY = (i + 0.5) / SETTINGS.ridgeCount;
-
-      ridges.push({
-        baseY,
-
-        ampA: 0.022 + seedRandom(s * 1.1) * 0.04,
-        freqA: 1.4 + seedRandom(s * 1.3) * 1.8,
-        phaseA: seedRandom(s * 1.7) * Math.PI * 2,
-
-        ampB: 0.008 + seedRandom(s * 2.1) * 0.02,
-        freqB: 3.8 + seedRandom(s * 2.3) * 3.2,
-        phaseB: seedRandom(s * 2.7) * Math.PI * 2,
-
-        ampC: 0.003 + seedRandom(s * 3.1) * 0.01,
-        freqC: 7.5 + seedRandom(s * 3.3) * 6.5,
-        phaseC: seedRandom(s * 3.7) * Math.PI * 2,
-
-        driftAmp: 0.004 + seedRandom(s * 4.1) * 0.008,
-        driftFreq: 0.6 + seedRandom(s * 4.3) * 1.2,
-        driftPhase: seedRandom(s * 4.7) * Math.PI * 2,
-      });
-    }
-
-    return ridges;
+  function getStrandBaseY(index) {
+    return (
+      index * SETTINGS.strandSpacing +
+      (seedRandom(index * 1.37) - 0.5) * SETTINGS.strandSpacingVariation
+    );
   }
 
-  function buildRidgeMap(renderWidth) {
-    const ridges = createRidges();
-    const ridgeMap = Array.from(
-      { length: ridges.length },
-      () => new Float32Array(renderWidth)
+  function getNaturalStrandY(index, worldX) {
+    const s = index + 10000;
+
+    const ampA = 18 + seedRandom(s * 1.1) * 34;
+    const freqA = 0.0016 + seedRandom(s * 1.3) * 0.0018;
+    const phaseA = seedRandom(s * 1.7) * Math.PI * 2;
+
+    const ampB = 6 + seedRandom(s * 2.1) * 16;
+    const freqB = 0.0042 + seedRandom(s * 2.3) * 0.0034;
+    const phaseB = seedRandom(s * 2.7) * Math.PI * 2;
+
+    const ampC = 2 + seedRandom(s * 3.1) * 8;
+    const freqC = 0.0085 + seedRandom(s * 3.3) * 0.0065;
+    const phaseC = seedRandom(s * 3.7) * Math.PI * 2;
+
+    const driftAmp = 3 + seedRandom(s * 4.1) * 8;
+    const driftFreq = 0.0007 + seedRandom(s * 4.3) * 0.0012;
+    const driftPhase = seedRandom(s * 4.7) * Math.PI * 2;
+
+    return (
+      getStrandBaseY(index) +
+      ampA * Math.sin(worldX * freqA + phaseA) +
+      ampB * Math.sin(worldX * freqB + phaseB) +
+      ampC * Math.sin(worldX * freqC + phaseC) +
+      driftAmp * Math.sin(worldX * driftFreq + driftPhase)
+    );
+  }
+
+  function getVisibleStrandIndexes(viewportHeight) {
+    const padding =
+      SETTINGS.gradientRadius +
+      SETTINGS.interactionRadius +
+      SETTINGS.strandSpacing * 2;
+
+    const firstIndex = Math.floor(-padding / SETTINGS.strandSpacing);
+    const lastIndex = Math.ceil(
+      (viewportHeight + padding) / SETTINGS.strandSpacing
     );
 
+    const indexes = [];
+
+    for (let index = firstIndex; index <= lastIndex; index += 1) {
+      indexes.push(index);
+    }
+
+    return indexes;
+  }
+
+  function buildStrandMap(renderWidth, viewportHeight) {
+    const indexes = getVisibleStrandIndexes(viewportHeight);
+
+    const strandMap = indexes.map((index) => ({
+      index,
+      values: new Float32Array(renderWidth),
+    }));
+
     for (let x = 0; x < renderWidth; x += 1) {
-      const nx = x / Math.max(1, renderWidth - 1);
-      const natural = new Array(ridges.length);
-
-      for (let i = 0; i < ridges.length; i += 1) {
-        const ridge = ridges[i];
-
-        const bend =
-          ridge.ampA * Math.sin(nx * Math.PI * ridge.freqA + ridge.phaseA) +
-          ridge.ampB * Math.sin(nx * Math.PI * ridge.freqB + ridge.phaseB) +
-          ridge.ampC * Math.sin(nx * Math.PI * ridge.freqC + ridge.phaseC) +
-          ridge.driftAmp * Math.sin(nx * Math.PI * ridge.driftFreq + ridge.driftPhase);
-
-        natural[i] = ridge.baseY + bend;
-      }
-
+      const worldX = x * SETTINGS.renderScale;
+      const natural = indexes.map((index) => getNaturalStrandY(index, worldX));
       let adjusted = natural.slice();
 
       for (let pass = 0; pass < SETTINGS.interactionPasses; pass += 1) {
@@ -144,12 +220,28 @@
         adjusted = next;
       }
 
-      for (let i = 0; i < adjusted.length; i += 1) {
-        ridgeMap[i][x] = clamp(adjusted[i], -0.3, 1.3);
+      for (let i = 0; i < strandMap.length; i += 1) {
+        strandMap[i].values[x] = adjusted[i];
       }
     }
 
-    return ridgeMap;
+    return strandMap;
+  }
+
+  function setCanvasSize(canvas, viewportSize, pixelRatio) {
+    const width = Math.floor(viewportSize.width * pixelRatio);
+    const height = Math.floor(viewportSize.height * pixelRatio);
+
+    if (canvas.width !== width) {
+      canvas.width = width;
+    }
+
+    if (canvas.height !== height) {
+      canvas.height = height;
+    }
+
+    canvas.style.width = `${viewportSize.width}px`;
+    canvas.style.height = `${viewportSize.height}px`;
   }
 
   function drawBackground() {
@@ -160,17 +252,27 @@
       return;
     }
 
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    const viewportSize = getStableViewportSize();
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, SETTINGS.maxPixelRatio);
+    const drawKey = `${viewportSize.width}x${viewportSize.height}@${pixelRatio}`;
 
-    canvas.width = Math.floor(viewportWidth * pixelRatio);
-    canvas.height = Math.floor(viewportHeight * pixelRatio);
-    canvas.style.width = `${viewportWidth}px`;
-    canvas.style.height = `${viewportHeight}px`;
+    setCanvasSize(canvas, viewportSize, pixelRatio);
 
-    const renderWidth = Math.max(760, Math.floor(viewportWidth / 1.5));
-    const renderHeight = Math.max(460, Math.floor(viewportHeight / 1.5));
+    if (drawKey === lastDrawKey) {
+      return;
+    }
+
+    lastDrawKey = drawKey;
+
+    const renderWidth = Math.max(
+      1,
+      Math.ceil(viewportSize.width / SETTINGS.renderScale)
+    );
+
+    const renderHeight = Math.max(
+      1,
+      Math.ceil(viewportSize.height / SETTINGS.renderScale)
+    );
 
     const temporaryCanvas = document.createElement("canvas");
     temporaryCanvas.width = renderWidth;
@@ -184,55 +286,60 @@
 
     const image = temporaryContext.createImageData(renderWidth, renderHeight);
     const data = image.data;
-
-    const ridgeMap = buildRidgeMap(renderWidth);
+    const strandMap = buildStrandMap(renderWidth, viewportSize.height);
 
     for (let y = 0; y < renderHeight; y += 1) {
+      const worldY = y * SETTINGS.renderScale;
+
       for (let x = 0; x < renderWidth; x += 1) {
-        const nx = x / renderWidth;
-        const ny = y / renderHeight;
+        const worldX = x * SETTINGS.renderScale;
 
-        let nearestDistance = 1;
+        let nearestDistance = Number.POSITIVE_INFINITY;
 
-        for (let i = 0; i < ridgeMap.length; i += 1) {
-          const ridgeY = ridgeMap[i][x];
-          const distance = Math.abs(ny - ridgeY);
+        for (let i = 0; i < strandMap.length; i += 1) {
+          const strandY = strandMap[i].values[x];
+          const distance = Math.abs(worldY - strandY);
 
           if (distance < nearestDistance) {
             nearestDistance = distance;
           }
         }
 
+        const nx = worldX / 980;
+        const ny = worldY / 760;
+
         const localDensity =
           SETTINGS.density +
           SETTINGS.densityVariationA * Math.sin(nx * Math.PI * 2.5 + 0.8) +
-          SETTINGS.densityVariationB * Math.sin(nx * Math.PI * 5.7 + ny * 1.2 + 1.9);
+          SETTINGS.densityVariationB *
+            Math.sin(nx * Math.PI * 5.7 + ny * 1.2 + 1.9);
 
         const densityMod = 1 + (localDensity - SETTINGS.density) * 0.015;
 
-        const dx = Math.abs(nx - 0.5) * 2;
-        const dy = Math.abs(ny - 0.5) * 2;
+        const viewportX = x / Math.max(1, renderWidth - 1);
+        const viewportY = y / Math.max(1, renderHeight - 1);
+
+        const dx = Math.abs(viewportX - 0.5) * 2;
+        const dy = Math.abs(viewportY - 0.5) * 2;
         const distanceFromCenter = Math.sqrt(dx * dx + dy * dy);
+
         const vignette = clamp(
           1 - Math.pow(distanceFromCenter, 1.65) * SETTINGS.vignetteStrength,
           0.92,
           1
         );
 
-        const dither =
-          SETTINGS.ditherStrength *
-          Math.sin((nx * 131.7 + ny * 293.1) * Math.PI * 2) *
-          Math.sin((nx * 271.3 - ny * 187.9) * Math.PI * 2);
+        const noise = (hashNoise(x, y) - 0.5) * SETTINGS.noiseStrength;
 
         const gradientValue = clamp(
-          gradientFromDistance(nearestDistance * densityMod) * vignette + dither,
+          gradientFromDistance(nearestDistance * densityMod) * vignette + noise,
           0,
           1
         );
 
         const color = colorFromGradient(gradientValue);
-
         const index = (y * renderWidth + x) * 4;
+
         data[index] = Math.round(color[0]);
         data[index + 1] = Math.round(color[1]);
         data[index + 2] = Math.round(color[2]);
@@ -247,16 +354,65 @@
     context.drawImage(temporaryCanvas, 0, 0, canvas.width, canvas.height);
   }
 
-  let resizeTimer;
-
-  window.addEventListener("resize", () => {
+  function scheduleDraw(delay = SETTINGS.resizeDelay) {
     window.clearTimeout(resizeTimer);
-    resizeTimer = window.setTimeout(drawBackground, 120);
-  });
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", drawBackground);
-  } else {
-    drawBackground();
+    resizeTimer = window.setTimeout(() => {
+      drawBackground();
+    }, delay);
   }
+
+  function resetAndScheduleDraw(delay = SETTINGS.resizeDelay) {
+    lastDrawKey = "";
+    scheduleDraw(delay);
+  }
+
+  function handleOrientationChange() {
+    stableSizes.clear();
+    lastDrawKey = "";
+    scheduleDraw(180);
+    scheduleDraw(420);
+  }
+
+  function mount() {
+    if (mounted) {
+      drawBackground();
+      return;
+    }
+
+    mounted = true;
+
+    window.addEventListener("resize", () => {
+      resetAndScheduleDraw();
+    });
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", () => {
+        resetAndScheduleDraw();
+      });
+    }
+
+    window.addEventListener("orientationchange", handleOrientationChange);
+
+    document.addEventListener("astro:page-load", () => {
+      drawBackground();
+    });
+
+    window.addEventListener("load", () => {
+      resetAndScheduleDraw(0);
+      resetAndScheduleDraw(250);
+    });
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => resetAndScheduleDraw(0));
+    } else {
+      resetAndScheduleDraw(0);
+    }
+  }
+
+  window.__siteBackgroundController = {
+    mount,
+    draw: drawBackground,
+  };
+
+  mount();
 })();

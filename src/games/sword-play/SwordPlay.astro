@@ -1,0 +1,32 @@
+---
+import "./sword-play.css";
+---
+
+<section class="sword-play-game" data-sword-play>
+  <div class="sword-play-canvas-wrap">
+    <canvas data-canvas width="900" height="620" aria-label="Sword Play game"
+    ></canvas>
+
+    <div class="sword-play-overlay">
+      <div class="sword-play-score sword-play-score-left">
+        <span class="sword-play-score-label">Score</span>
+        <strong data-score>0</strong>
+      </div>
+
+      <div class="sword-play-score sword-play-score-right">
+        <span class="sword-play-score-label">Best</span>
+        <strong data-best>0</strong>
+      </div>
+
+      <div class="sword-play-message" data-message>
+        Grab a body part to start.
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initSwordPlayGames } from "./sword-play.js";
+
+  initSwordPlayGames();
+</script>

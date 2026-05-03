@@ -63,7 +63,9 @@ function getImageSrc(image: ArtImage) {
 
 <BaseLayout title={`${category.title}`}>
   <div class="art-page-top">
-    <a href={backHref} class="back-link main-html">← Art</a>
+    <div class="art-back-row">
+      <a href={backHref} class="art-back-button">Back to Art</a>
+    </div>
 
     <h1 class="main-heading main-html">{category.title}</h1>
 

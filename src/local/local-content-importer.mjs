@@ -70,7 +70,6 @@ export function processAllLocalContentFiles() {
   });
 }
 
-// Alias dla starych komend/importów.
 export function processAllArtCategoryFiles() {
   processAllLocalContentFiles();
 }

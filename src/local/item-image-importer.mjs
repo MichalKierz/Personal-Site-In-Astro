@@ -4,6 +4,7 @@ import {
   cleanupDeletedPublicFolders,
   getJsonFilesFromDirectory,
   importImageFromSourcePath,
+  movePublicImageToSlug,
   readJsonFile,
   writeJsonFile,
 } from "./importer-utils.mjs";
@@ -42,8 +43,20 @@ export function processItemImages({
 
     const normalizedItem = normalizeItem(item);
 
-    let changed =
-      JSON.stringify(normalizedItem) !== JSON.stringify(item);
+    let changed = JSON.stringify(normalizedItem) !== JSON.stringify(item);
+
+    const movedImage = movePublicImageToSlug({
+      publicPath: normalizedItem.image,
+      publicBaseDir: absolutePublicBaseDir,
+      publicBasePath,
+      targetSlug: file.slug,
+      logLabel,
+    });
+
+    if (movedImage && movedImage !== normalizedItem.image) {
+      normalizedItem.image = movedImage;
+      changed = true;
+    }
 
     const result = importImageFromSourcePath({
       sourcePath: normalizedItem.sourcePath,
@@ -53,10 +66,18 @@ export function processItemImages({
     });
 
     if (result) {
+      const resultImage = movePublicImageToSlug({
+        publicPath: result.publicPath,
+        publicBaseDir: absolutePublicBaseDir,
+        publicBasePath,
+        targetSlug: file.slug,
+        logLabel,
+      });
+
       changed = true;
 
       normalizedItem.sourcePath = "";
-      normalizedItem.image = result.publicPath;
+      normalizedItem.image = resultImage ?? result.publicPath;
     }
 
     if (!changed) {
