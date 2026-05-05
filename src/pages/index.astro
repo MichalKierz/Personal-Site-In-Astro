@@ -3,9 +3,12 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import mainContent from "../content/main.json";
 
 const hasPhoto = Boolean(mainContent.profilePhoto);
+
+const pageDescription =
+  "The personal website of Michał Kierzkowski. Learn more, explore projects, games and art.";
 ---
 
-<BaseLayout title="Michał Kierzkowski">
+<BaseLayout title="Michał Kierzkowski" description={pageDescription}>
   <article class="main-content main-page">
     <aside class="profile-box">
       <div class="profile-photo">

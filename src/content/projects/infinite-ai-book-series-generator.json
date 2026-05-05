@@ -2,5 +2,6 @@
   "title": "Infinite AI Book Series Generator",
   "image": "/images/projects/infinite-ai-book-series-generator/iaibsgshowcase.png",
   "descriptionHtml": "Infinite AI Book Series Generator is a desktop app for generating long-running AI-powered book series with a simple GUI.\nIt lets you configure an AI provider, start a new series, continue an existing one, edit prompt files, and automatically save generated books, summaries, and intermediate JSON data to a workspace folder.\n<br><br>\n<a href=\"https://github.com/MichalKierz/Infinite-AI-Book-Series-Generator\"> GitHub Page </a>\n<br>\n<a href=\"https://github.com/MichalKierz/Infinite-AI-Book-Series-Generator/releases/tag/v1.0\"> Download Link </a>",
-  "sourcePath": ""
+  "sourcePath": "",
+  "thumbnail": "/images/projects/infinite-ai-book-series-generator/iaibsgshowcase-thumb.webp"
 }

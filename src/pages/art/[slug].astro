@@ -4,7 +4,9 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 type ArtImage =
   | string
   | {
+      sourcePath?: string;
       image?: string;
+      thumbnail?: string;
       src?: string;
       file?: string;
       adminLabel?: string;
@@ -44,20 +46,34 @@ const images = category.images ?? [];
 
 const backHref = "/art/";
 
-function getImageSrc(image: ArtImage) {
-  if (typeof image === "string") {
-    return image.startsWith("public/") ? image.replace("public", "") : image;
-  }
-
-  const rawPath = image.image || image.src || image.file || "";
-
-  if (!rawPath) {
+function normalizeImagePath(image?: string) {
+  if (!image) {
     return "";
   }
 
-  return rawPath.startsWith("public/")
-    ? rawPath.replace("public", "")
-    : rawPath;
+  return image.startsWith("public/") ? image.replace("public", "") : image;
+}
+
+function getImagePaths(image: ArtImage) {
+  if (typeof image === "string") {
+    const imageSrc = normalizeImagePath(image);
+
+    return {
+      imageSrc,
+      thumbnailSrc: imageSrc,
+    };
+  }
+
+  const imageSrc = normalizeImagePath(
+    image.image || image.src || image.file || "",
+  );
+
+  const thumbnailSrc = normalizeImagePath(image.thumbnail) || imageSrc;
+
+  return {
+    imageSrc,
+    thumbnailSrc,
+  };
 }
 ---
 
@@ -84,13 +100,15 @@ function getImageSrc(image: ArtImage) {
     ) : (
       <section class="art-image-grid">
         {images.map((item, index) => {
-          const imageSrc = getImageSrc(item);
+          const { imageSrc, thumbnailSrc } = getImagePaths(item);
 
           return (
             <figure class="art-image-card">
               <img
-                src={imageSrc}
+                src={thumbnailSrc}
                 alt={`${category.title} image ${index + 1}`}
+                loading="lazy"
+                decoding="async"
               />
 
               <div class="art-image-actions">
@@ -134,28 +152,38 @@ function getImageSrc(image: ArtImage) {
   </div>
 
   <script>
-    const modal = document.querySelector("[data-image-modal]");
-    const modalImage = document.querySelector("[data-modal-image]");
-    const modalClose = document.querySelector("[data-modal-close]");
-    const modalDownload = document.querySelector("[data-modal-download]");
-    const openButtons = document.querySelectorAll("[data-fullscreen-image]");
+    const appWindow = window as Window & {
+      imageModalInitialized?: boolean;
+    };
 
-    openButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        const image = button.getAttribute("data-fullscreen-image");
+    function getImageModalParts() {
+      const modal = document.querySelector("[data-image-modal]");
+      const modalImage = document.querySelector("[data-modal-image]");
+      const modalDownload = document.querySelector("[data-modal-download]");
 
-        if (!image || !modal || !modalImage || !modalDownload) {
-          return;
-        }
+      return {
+        modal,
+        modalImage,
+        modalDownload,
+      };
+    }
 
-        modalImage.setAttribute("src", image);
-        modalDownload.setAttribute("href", image);
-        modal.removeAttribute("hidden");
-        document.body.classList.add("modal-open");
-      });
-    });
+    function openImageModal(image: string) {
+      const { modal, modalImage, modalDownload } = getImageModalParts();
 
-    function closeModal() {
+      if (!modal || !modalImage || !modalDownload) {
+        return;
+      }
+
+      modalImage.setAttribute("src", image);
+      modalDownload.setAttribute("href", image);
+      modal.removeAttribute("hidden");
+      document.body.classList.add("modal-open");
+    }
+
+    function closeImageModal() {
+      const { modal, modalImage } = getImageModalParts();
+
       if (!modal || !modalImage) {
         return;
       }
@@ -165,18 +193,46 @@ function getImageSrc(image: ArtImage) {
       document.body.classList.remove("modal-open");
     }
 
-    modalClose?.addEventListener("click", closeModal);
+    if (!appWindow.imageModalInitialized) {
+      appWindow.imageModalInitialized = true;
 
-    modal?.addEventListener("click", (event) => {
-      if (event.target === modal) {
-        closeModal();
-      }
-    });
+      document.addEventListener("click", (event) => {
+        if (!(event.target instanceof Element)) {
+          return;
+        }
 
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") {
-        closeModal();
-      }
-    });
+        const openButton = event.target.closest("[data-fullscreen-image]");
+
+        if (openButton) {
+          event.preventDefault();
+
+          const image = openButton.getAttribute("data-fullscreen-image");
+
+          if (image) {
+            openImageModal(image);
+          }
+
+          return;
+        }
+
+        const closeButton = event.target.closest("[data-modal-close]");
+
+        if (closeButton) {
+          event.preventDefault();
+          closeImageModal();
+          return;
+        }
+
+        if (event.target.matches("[data-image-modal]")) {
+          closeImageModal();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeImageModal();
+        }
+      });
+    }
   </script>
 </BaseLayout>

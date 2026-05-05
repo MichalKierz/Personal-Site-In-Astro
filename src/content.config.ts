@@ -7,6 +7,7 @@ const imageItemSchema = z.union([
   z.object({
     sourcePath: z.string().optional(),
     image: z.string().optional(),
+    thumbnail: z.string().optional(),
     src: z.string().optional(),
     file: z.string().optional(),
     fileName: z.string().optional(),
@@ -52,6 +53,7 @@ const projects = defineCollection({
     status: z.string().optional(),
     sourcePath: z.string().optional(),
     image: z.string().optional(),
+    thumbnail: z.string().optional(),
     descriptionHtml: z.string(),
   }),
 });

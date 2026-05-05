@@ -2,6 +2,7 @@ import path from "node:path";
 
 import {
   cleanupDeletedPublicFolders,
+  ensureImageThumbnail,
   getJsonFilesFromDirectory,
   importImageFromSourcePath,
   movePublicImageToSlug,
@@ -18,6 +19,7 @@ function normalizeImageItem(item) {
     return {
       sourcePath: "",
       image: item,
+      thumbnail: "",
       adminLabel: "",
     };
   }
@@ -25,11 +27,12 @@ function normalizeImageItem(item) {
   return {
     sourcePath: item?.sourcePath ?? "",
     image: item?.image ?? item?.src ?? item?.file ?? item?.fileName ?? "",
+    thumbnail: item?.thumbnail ?? "",
     adminLabel: item?.adminLabel ?? "",
   };
 }
 
-export function processArtCategoryFile(filePath) {
+export async function processArtCategoryFile(filePath) {
   const root = process.cwd();
 
   const category = readJsonFile(filePath, "art-importer");
@@ -46,7 +49,9 @@ export function processArtCategoryFile(filePath) {
 
   let changed = false;
 
-  const nextImages = category.images.map((rawImage) => {
+  const nextImages = [];
+
+  for (const rawImage of category.images) {
     const item = normalizeImageItem(rawImage);
 
     if (JSON.stringify(item) !== JSON.stringify(rawImage)) {
@@ -66,6 +71,19 @@ export function processArtCategoryFile(filePath) {
       changed = true;
     }
 
+    const movedThumbnail = movePublicImageToSlug({
+      publicPath: item.thumbnail,
+      publicBaseDir: path.join(root, "public", "images", "art"),
+      publicBasePath: "/images/art",
+      targetSlug: slug,
+      logLabel: "art-importer",
+    });
+
+    if (movedThumbnail && movedThumbnail !== item.thumbnail) {
+      item.thumbnail = movedThumbnail;
+      changed = true;
+    }
+
     const result = importImageFromSourcePath({
       sourcePath: item.sourcePath,
       targetDir: path.join(root, "public", "images", "art", slug),
@@ -73,28 +91,39 @@ export function processArtCategoryFile(filePath) {
       logLabel: "art-importer",
     });
 
-    if (!result) {
-      return item;
+    if (result) {
+      const resultImage = movePublicImageToSlug({
+        publicPath: result.publicPath,
+        publicBaseDir: path.join(root, "public", "images", "art"),
+        publicBasePath: "/images/art",
+        targetSlug: slug,
+        logLabel: "art-importer",
+      });
+
+      item.sourcePath = "";
+      item.image = resultImage ?? result.publicPath;
+      item.thumbnail = "";
+      item.adminLabel =
+        item.adminLabel ||
+        path.basename(result.fileName, path.extname(result.fileName));
+
+      changed = true;
     }
 
-    const resultImage = movePublicImageToSlug({
-      publicPath: result.publicPath,
-      publicBaseDir: path.join(root, "public", "images", "art"),
-      publicBasePath: "/images/art",
-      targetSlug: slug,
-      logLabel: "art-importer",
-    });
+    if (item.image) {
+      const thumbnail = await ensureImageThumbnail({
+        imagePath: item.image,
+        logLabel: "art-importer",
+      });
 
-    changed = true;
+      if (thumbnail && thumbnail !== item.thumbnail) {
+        item.thumbnail = thumbnail;
+        changed = true;
+      }
+    }
 
-    return {
-      sourcePath: "",
-      image: resultImage ?? result.publicPath,
-      adminLabel:
-        item.adminLabel ||
-        path.basename(result.fileName, path.extname(result.fileName)),
-    };
-  });
+    nextImages.push(item);
+  }
 
   if (!changed) {
     return;
@@ -108,14 +137,14 @@ export function processArtCategoryFile(filePath) {
   console.log(`[art-importer] Updated: ${filePath}`);
 }
 
-export function processAllArtFiles() {
+export async function processAllArtFiles() {
   const root = process.cwd();
   const categoriesDir = getArtCategoriesDir(root);
 
   const files = getJsonFilesFromDirectory(categoriesDir);
 
   for (const file of files) {
-    processArtCategoryFile(file.filePath);
+    await processArtCategoryFile(file.filePath);
   }
 }
 

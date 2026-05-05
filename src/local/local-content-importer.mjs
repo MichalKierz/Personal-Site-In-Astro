@@ -36,6 +36,7 @@ const projectImageConfig = {
   publicBaseDir: "public/images/projects",
   publicBasePath: "/images/projects",
   logLabel: "project-importer",
+  createThumbnail: true,
 };
 
 const gameImageConfig = {
@@ -43,13 +44,14 @@ const gameImageConfig = {
   publicBaseDir: "public/images/games",
   publicBasePath: "/images/games",
   logLabel: "game-importer",
+  createThumbnail: false,
 };
 
-export function processAllLocalContentFiles() {
-  processAllArtFiles();
+export async function processAllLocalContentFiles() {
+  await processAllArtFiles();
 
-  processItemImages(projectImageConfig);
-  processItemImages(gameImageConfig);
+  await processItemImages(projectImageConfig);
+  await processItemImages(gameImageConfig);
 
   syncOrderFile(artOrderConfig);
   syncOrderFile(projectOrderConfig);
@@ -70,6 +72,6 @@ export function processAllLocalContentFiles() {
   });
 }
 
-export function processAllArtCategoryFiles() {
-  processAllLocalContentFiles();
+export async function processAllArtCategoryFiles() {
+  await processAllLocalContentFiles();
 }

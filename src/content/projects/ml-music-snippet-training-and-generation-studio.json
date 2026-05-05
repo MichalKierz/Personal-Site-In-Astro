@@ -2,5 +2,6 @@
   "title": "ML Music Snippet Training & Generation Studio",
   "image": "/images/projects/ml-music-snippet-training-and-generation-studio/mmlshowcase.png",
   "descriptionHtml": "ML Music Snippet Training & Generation Studio is a desktop application for preprocessing audio, training metadata-conditioned music snippet models, and generating new MP3 snippets from trained models.\nThe project is intended for local experimentation with your own music collection. It provides a GUI workflow for dataset preparation, model training, model loading, prompt-based generation, and MP3 export.\n<br><br>\n<a href=\"https://github.com/MichalKierz/ML-Music-Snippet-Training-Generation-Studio\"> GitHub Page </a>",
-  "sourcePath": ""
+  "sourcePath": "",
+  "thumbnail": "/images/projects/ml-music-snippet-training-and-generation-studio/mmlshowcase-thumb.webp"
 }

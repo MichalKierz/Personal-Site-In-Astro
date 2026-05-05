@@ -7,6 +7,7 @@ type ProjectItem = {
   title: string;
   status?: string;
   image?: string;
+  thumbnail?: string;
   sourcePath?: string;
   descriptionHtml: string;
 };
@@ -92,6 +93,7 @@ function getImageSrc(image?: string) {
       <section class="projects-list">
         {sortedProjects.map((project) => {
           const imageSrc = getImageSrc(project.image);
+          const thumbnailSrc = getImageSrc(project.thumbnail) || imageSrc;
           const status = project.status?.trim();
 
           return (
@@ -100,7 +102,7 @@ function getImageSrc(image?: string) {
                 {imageSrc ? (
                   <>
                     <img
-                      src={imageSrc}
+                      src={thumbnailSrc}
                       alt={project.title}
                       loading="lazy"
                       decoding="async"

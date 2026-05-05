@@ -3,5 +3,6 @@
   "status": "In Development",
   "image": "/images/projects/space-empires/seshowcase.png",
   "descriptionHtml": "Space Empires (working title) will be a simulation game about galactic empires, with extensive support for custom content.\nThe game is about creating civilizations and scenarios, then watching how they develop over time.\nAt its current stage, it allows players to create their own civilizations, political systems, maps, scenarios, and UI appearance.",
-  "sourcePath": ""
+  "sourcePath": "",
+  "thumbnail": "/images/projects/space-empires/seshowcase-thumb.webp"
 }

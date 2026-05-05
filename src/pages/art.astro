@@ -7,6 +7,7 @@ type ArtImage =
   | {
       sourcePath?: string;
       image?: string;
+      thumbnail?: string;
       src?: string;
       file?: string;
       adminLabel?: string;
@@ -77,24 +78,30 @@ function sortByOrder(items: ArtCategory[], orderItems: OrderItem[]) {
 
 const sortedCategories = sortByOrder(categories, order);
 
+function normalizeImagePath(image?: string) {
+  if (!image) {
+    return "";
+  }
+
+  return image.startsWith("public/") ? image.replace("public", "") : image;
+}
+
 function getImageSrc(image: ArtImage | undefined) {
   if (!image) {
     return "";
   }
 
   if (typeof image === "string") {
-    return image.startsWith("public/") ? image.replace("public", "") : image;
+    return normalizeImagePath(image);
   }
 
-  const rawPath = image.image || image.src || image.file || "";
+  const thumbnail = normalizeImagePath(image.thumbnail);
 
-  if (!rawPath) {
-    return "";
+  if (thumbnail) {
+    return thumbnail;
   }
 
-  return rawPath.startsWith("public/")
-    ? rawPath.replace("public", "")
-    : rawPath;
+  return normalizeImagePath(image.image || image.src || image.file || "");
 }
 
 function getCategoryHref(slug: string) {

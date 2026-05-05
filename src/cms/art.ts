@@ -48,7 +48,13 @@ export const artCategories = collection({
         image: fields.text({
           label: "Public image path",
           description:
-            "Generated automatically after Save. Example: /images/art/ai-images/image.png",
+            "Generated automatically after Save. This is the full image used for fullscreen view and download.",
+        }),
+
+        thumbnail: fields.text({
+          label: "Public thumbnail path",
+          description:
+            "Generated automatically after Save. This is the compressed image used in the category gallery.",
         }),
 
         adminLabel: fields.text({

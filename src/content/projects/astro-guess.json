@@ -3,5 +3,6 @@
   "status": "In Development",
   "sourcePath": "",
   "descriptionHtml": "Astro Guess (working title) will be a website featuring challenging astronomy quizzes.\nIts flagship quiz modes will include identifying a star based on its surroundings on a 3D map, as well as identifying a location on the sky map from a zoomed in view.\nIn addition to these modes, the site will offer more traditional quizzes across various categories, including multiple choice questions, entering the correct names in marked areas of an image, and completing data tables.\nAt its current stage, the website also includes global rankings, friend rankings, and certificates. Certificates are large exams made up of multiple quizzes that can be attempted once per day. After passing a certificate exam, users can print their certificate, while others can verify it through a dedicated search tool.",
-  "image": "/images/projects/astro-guess/agshowcase.png"
+  "image": "/images/projects/astro-guess/agshowcase.png",
+  "thumbnail": "/images/projects/astro-guess/agshowcase-thumb.webp"
 }

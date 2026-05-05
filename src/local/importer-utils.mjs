@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import sharp from "sharp";
 
 export const allowedExtensions = new Set([
   ".jpg",
@@ -10,6 +11,21 @@ export const allowedExtensions = new Set([
   ".gif",
   ".avif",
 ]);
+
+const thumbnailExtensions = new Set([
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".webp",
+  ".avif",
+]);
+
+const animatedExtensions = new Set([
+  ".gif",
+]);
+
+const thumbnailWidth = 900;
+const thumbnailQuality = 72;
 
 export function cleanSourcePath(value) {
   if (!value || typeof value !== "string") {
@@ -128,6 +144,10 @@ function moveFile(sourcePath, targetPath) {
   }
 }
 
+function isGeneratedThumbnailFileName(fileName) {
+  return fileName.toLowerCase().endsWith("-thumb.webp");
+}
+
 function findExistingIdenticalFile(directory, sourcePath) {
   if (!fs.existsSync(directory)) {
     return null;
@@ -141,6 +161,10 @@ function findExistingIdenticalFile(directory, sourcePath) {
 
   for (const entry of entries) {
     if (!entry.isFile()) {
+      continue;
+    }
+
+    if (isGeneratedThumbnailFileName(entry.name)) {
       continue;
     }
 
@@ -163,6 +187,113 @@ function findExistingIdenticalFile(directory, sourcePath) {
   }
 
   return null;
+}
+
+function publicImagePathToFilePath(publicPath) {
+  const normalizedPublicPath = normalizePublicImagePath(publicPath);
+
+  if (!normalizedPublicPath) {
+    return "";
+  }
+
+  const publicRelativePath = normalizedPublicPath.startsWith("public/")
+    ? normalizedPublicPath.replace(/^public\//, "")
+    : normalizedPublicPath.replace(/^\/+/, "");
+
+  return path.join(process.cwd(), "public", publicRelativePath);
+}
+
+export function getGeneratedThumbnailPublicPath(publicPath) {
+  const normalizedPublicPath = normalizePublicImagePath(publicPath);
+
+  if (!normalizedPublicPath) {
+    return "";
+  }
+
+  if (isGeneratedThumbnailFileName(normalizedPublicPath)) {
+    return normalizedPublicPath;
+  }
+
+  const extension = path.extname(normalizedPublicPath);
+
+  if (!extension) {
+    return "";
+  }
+
+  return `${normalizedPublicPath.slice(0, -extension.length)}-thumb.webp`;
+}
+
+export async function ensureImageThumbnail({
+  imagePath,
+  logLabel,
+  width = thumbnailWidth,
+  quality = thumbnailQuality,
+}) {
+  const normalizedImagePath = normalizePublicImagePath(imagePath);
+
+  if (!normalizedImagePath) {
+    return "";
+  }
+
+  if (isGeneratedThumbnailFileName(normalizedImagePath)) {
+    return normalizedImagePath;
+  }
+
+  const sourceExtension = path.extname(normalizedImagePath).toLowerCase();
+
+  if (animatedExtensions.has(sourceExtension)) {
+    return normalizedImagePath;
+  }
+
+  if (!thumbnailExtensions.has(sourceExtension)) {
+    return normalizedImagePath;
+  }
+
+  const thumbnailPublicPath = getGeneratedThumbnailPublicPath(normalizedImagePath);
+
+  if (!thumbnailPublicPath) {
+    return normalizedImagePath;
+  }
+
+  const sourcePath = publicImagePathToFilePath(normalizedImagePath);
+  const thumbnailPath = publicImagePathToFilePath(thumbnailPublicPath);
+
+  if (!fs.existsSync(sourcePath)) {
+    console.warn(`[${logLabel}] Source image does not exist: ${normalizedImagePath}`);
+    return fs.existsSync(thumbnailPath) ? thumbnailPublicPath : normalizedImagePath;
+  }
+
+  if (fs.existsSync(thumbnailPath)) {
+    const sourceStats = fs.statSync(sourcePath);
+    const thumbnailStats = fs.statSync(thumbnailPath);
+
+    if (thumbnailStats.mtimeMs >= sourceStats.mtimeMs) {
+      return thumbnailPublicPath;
+    }
+  }
+
+  fs.mkdirSync(path.dirname(thumbnailPath), { recursive: true });
+
+  try {
+    await sharp(sourcePath, { animated: false })
+      .rotate()
+      .resize({
+        width,
+        withoutEnlargement: true,
+      })
+      .webp({
+        quality,
+      })
+      .toFile(thumbnailPath);
+
+    console.log(`[${logLabel}] Generated thumbnail: ${thumbnailPublicPath}`);
+
+    return thumbnailPublicPath;
+  } catch (error) {
+    console.warn(`[${logLabel}] Failed to generate thumbnail: ${normalizedImagePath}`);
+    console.warn(error);
+    return normalizedImagePath;
+  }
 }
 
 export function readJsonFile(filePath, logLabel) {
@@ -274,7 +405,11 @@ export function movePublicImageToSlug({
   const root = process.cwd();
   const absolutePublicBaseDir = toAbsolutePath(root, publicBaseDir);
   const sourcePath = path.join(absolutePublicBaseDir, currentSlug, ...imageParts);
-  const targetDir = path.join(absolutePublicBaseDir, targetSlug, ...imageParts.slice(0, -1));
+  const targetDir = path.join(
+    absolutePublicBaseDir,
+    targetSlug,
+    ...imageParts.slice(0, -1)
+  );
   const originalFileName = imageParts.at(-1);
   const preferredTargetPath = path.join(targetDir, originalFileName);
   let targetFileName = originalFileName;

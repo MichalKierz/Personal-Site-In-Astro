@@ -127,10 +127,10 @@ async function runScheduledLocalContentImport() {
     );
 
     const importer = (await import(importerPath.href)) as {
-      processAllLocalContentFiles: () => void;
+      processAllLocalContentFiles: () => Promise<void> | void;
     };
 
-    importer.processAllLocalContentFiles();
+    await importer.processAllLocalContentFiles();
   } catch (error) {
     console.error("[local-content-importer] Failed after Keystatic write:");
     console.error(error);
