@@ -9,16 +9,24 @@
       "label": "Space Empires"
     },
     {
-      "slug": "meditation-sound-studio",
-      "label": "Meditation Sound Studio"
+      "slug": "ai-agent-orchestrator",
+      "label": "AI Agent Orchestrator"
+    },
+    {
+      "slug": "ml-music-snippet-training-and-generation-studio",
+      "label": "ML Music Snippet Training & Generation Studio"
     },
     {
       "slug": "infinite-ai-book-series-generator",
       "label": "Infinite AI Book Series Generator"
     },
     {
-      "slug": "ml-music-snippet-training-and-generation-studio",
-      "label": "ML Music Snippet Training & Generation Studio"
+      "slug": "meditation-sound-studio",
+      "label": "Meditation Sound Studio"
+    },
+    {
+      "slug": "motw-inspector",
+      "label": "MOTW Inspector"
     }
   ]
 }

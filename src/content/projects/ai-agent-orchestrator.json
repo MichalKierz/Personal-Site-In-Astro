@@ -1,0 +1,7 @@
+{
+  "title": "AI Agent Orchestrator",
+  "sourcePath": "",
+  "descriptionHtml": "AI Agent Orchestrator is a program for designing and running coordinated AI agent workflows. It helps turn one task into a structured process where specialized agents plan, analyze, verify, and produce a final Markdown report.\n<br><br>\n<a href=\"https://github.com/MichalKierz/AI-Agent-Orchestrator\"> GitHub Page </a>\n<br>\n<a href=\"https://github.com/MichalKierz/AI-Agent-Orchestrator/releases/tag/v1.0\"> Download Link </a>",
+  "image": "/images/projects/ai-agent-orchestrator/aiaoshowcase.png",
+  "thumbnail": "/images/projects/ai-agent-orchestrator/aiaoshowcase-thumb.webp"
+}

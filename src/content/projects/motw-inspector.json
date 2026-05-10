@@ -1,0 +1,7 @@
+{
+  "title": "MOTW Inspector",
+  "image": "/images/projects/motw-inspector/motwishowcase.png",
+  "thumbnail": "/images/projects/motw-inspector/motwishowcase-thumb.webp",
+  "descriptionHtml": "MOTW Inspector is a Windows program for inspecting Mark-of-the-Web metadata on files. It helps security testers, developers and IT teams verify whether downloaded archives keep their Internet-origin trust marker after extraction.\n<br><br>\n<a href=\"https://github.com/MichalKierz/MOTW-Inspector\"> GitHub Page </a>\n<br>\n<a href=\"https://github.com/MichalKierz/MOTW-Inspector/releases/tag/v1.0\"> Download Link </a>",
+  "sourcePath": ""
+}
