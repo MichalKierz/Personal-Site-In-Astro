@@ -21,6 +21,12 @@
     },
     {
       "sourcePath": "",
+      "image": "/images/art/edits/cliff3.png",
+      "thumbnail": "/images/art/edits/cliff3-thumb.webp",
+      "adminLabel": "purple-cliff"
+    },
+    {
+      "sourcePath": "",
       "image": "/images/art/edits/cliff2.png",
       "thumbnail": "/images/art/edits/cliff2-thumb.webp",
       "adminLabel": "green-cliff"
